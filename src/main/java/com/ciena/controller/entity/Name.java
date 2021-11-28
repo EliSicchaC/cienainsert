@@ -8,6 +8,14 @@ public class Name {
     @JsonProperty("value")
     private String value;
 
+    @Override
+    public String toString() {
+        return "Name{" +
+                "value_name='" + value_name + '\'' +
+                ", value='" + value + '\'' +
+                '}';
+    }
+
     public Name(String value_name, String value) {
         this.value_name = value_name;
         this.value = value;

@@ -8,10 +8,8 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.ALWAYS)
 public class ServiceInterface {
-
     @JsonProperty("uuid")
     private String uuid;
-
     @JsonProperty("supported-layer-protocol-qualifier")
     private List<String> supported_layer_protocol_qualifier;
     @JsonProperty("lifecycle-state")
@@ -30,14 +28,10 @@ public class ServiceInterface {
     private String operational_state;
     @JsonProperty("name")
     private List<Name> name;
+    @JsonProperty("tapi-photonic-media:otsi-service-interface-point-spec")
+    private PhotonicService tapi_photonic_media_otsi_service_interface_point_spec;
 
-    public ServiceInterface(){
-    }
-    public ServiceInterface(String uuid, List<String> supported_layer_protocol_qualifier,
-                            String lifecycle_state, PotencialCapacity total_potential_capacity,
-                            String layer_protocol_name, String administrative_state,
-                            PotencialCapacity available_capacity, String direction,
-                            String operational_state, List<Name> name) {
+    public ServiceInterface(String uuid, List<String> supported_layer_protocol_qualifier, String lifecycle_state, PotencialCapacity total_potential_capacity, String layer_protocol_name, String administrative_state, PotencialCapacity available_capacity, String direction, String operational_state, List<Name> name, PhotonicService tapi_photonic_media_otsi_service_interface_point_spec) {
         this.uuid = uuid;
         this.supported_layer_protocol_qualifier = supported_layer_protocol_qualifier;
         this.lifecycle_state = lifecycle_state;
@@ -48,6 +42,9 @@ public class ServiceInterface {
         this.direction = direction;
         this.operational_state = operational_state;
         this.name = name;
+        this.tapi_photonic_media_otsi_service_interface_point_spec = tapi_photonic_media_otsi_service_interface_point_spec;
+    }
+    public ServiceInterface(){
     }
 
     public String getUuid() {
@@ -128,6 +125,14 @@ public class ServiceInterface {
 
     public void setName(List<Name> name) {
         this.name = name;
+    }
+
+    public PhotonicService getTapi_photonic_media_otsi_service_interface_point_spec() {
+        return tapi_photonic_media_otsi_service_interface_point_spec;
+    }
+
+    public void setTapi_photonic_media_otsi_service_interface_point_spec(PhotonicService tapi_photonic_media_otsi_service_interface_point_spec) {
+        this.tapi_photonic_media_otsi_service_interface_point_spec = tapi_photonic_media_otsi_service_interface_point_spec;
     }
 }
 

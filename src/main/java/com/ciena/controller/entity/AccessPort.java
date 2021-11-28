@@ -4,29 +4,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class TopologyService {
+public class AccessPort {
     @JsonProperty("uuid")
     private String uuid;
-    @JsonProperty("topology")
-    private List<TopologyObject> topology;
+    @JsonProperty("connector-pin")
+    private List<ConnectorPin>connector_pin;
     @JsonProperty("name")
-    private List <Name>name;
+    private List<Name>name;
 
     @Override
     public String toString() {
-        return "TopologyService{" +
+        return "AccessPort{" +
                 "uuid='" + uuid + '\'' +
-                ", topology=" + topology +
+                ", connector_pin=" + connector_pin +
                 ", name=" + name +
                 '}';
     }
 
-    public TopologyService(String uuid, List<TopologyObject> topology, List<Name> name) {
+    public AccessPort(String uuid, List<ConnectorPin> connector_pin, List<Name> name) {
         this.uuid = uuid;
-        this.topology = topology;
+        this.connector_pin = connector_pin;
         this.name = name;
     }
-    public TopologyService(){
+    public AccessPort(){
     }
 
     public String getUuid() {
@@ -37,12 +37,12 @@ public class TopologyService {
         this.uuid = uuid;
     }
 
-    public List<TopologyObject> getTopology() {
-        return topology;
+    public List<ConnectorPin> getConnector_pin() {
+        return connector_pin;
     }
 
-    public void setTopology(List<TopologyObject> topology) {
-        this.topology = topology;
+    public void setConnector_pin(List<ConnectorPin> connector_pin) {
+        this.connector_pin = connector_pin;
     }
 
     public List<Name> getName() {

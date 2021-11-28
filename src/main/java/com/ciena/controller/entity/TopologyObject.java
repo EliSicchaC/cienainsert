@@ -6,6 +6,13 @@ public class TopologyObject {
     @JsonProperty("topology-uuid")
     private String topology_uuid;
 
+    @Override
+    public String toString() {
+        return "TopologyObject{" +
+                "topology_uuid='" + topology_uuid + '\'' +
+                '}';
+    }
+
     public TopologyObject(String topology_uuid) {
         this.topology_uuid = topology_uuid;
     }

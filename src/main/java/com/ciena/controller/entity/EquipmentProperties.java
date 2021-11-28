@@ -12,6 +12,15 @@ public class EquipmentProperties {
     @JsonProperty("equipment-type-name")
     private String equipment_type_name;
 
+    @Override
+    public String toString() {
+        return "EquipmentProperties{" +
+                "equipment_type_version='" + equipment_type_version + '\'' +
+                ", manufacturer_name='" + manufacturer_name + '\'' +
+                ", equipment_type_name='" + equipment_type_name + '\'' +
+                '}';
+    }
+
     public EquipmentProperties(String equipment_type_version, String manufacturer_name, String equipment_type_name) {
         this.equipment_type_version = equipment_type_version;
         this.manufacturer_name = manufacturer_name;

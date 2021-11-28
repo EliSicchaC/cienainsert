@@ -16,6 +16,17 @@ public class Node {
     @JsonProperty("owned-node-edge-point")
     private List<OwnedNode>owned_node_edge_point;
 
+    @Override
+    public String toString() {
+        return "Node{" +
+                "uuid='" + uuid + '\'' +
+                ", lifecycle_state='" + lifecycle_state + '\'' +
+                ", name=" + name +
+                ", operational_state='" + operational_state + '\'' +
+                ", owned_node_edge_point=" + owned_node_edge_point +
+                '}';
+    }
+
     public Node(String uuid, String lifecycle_state, List<Name> name, String operational_state, List<OwnedNode> owned_node_edge_point) {
         this.uuid = uuid;
         this.lifecycle_state = lifecycle_state;

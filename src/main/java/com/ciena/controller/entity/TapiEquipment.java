@@ -12,6 +12,15 @@ public class TapiEquipment {
     @JsonProperty("name")
     private List<Name>name;
 
+    @Override
+    public String toString() {
+        return "TapiEquipment{" +
+                "device=" + device +
+                ", uuid='" + uuid + '\'' +
+                ", name=" + name +
+                '}';
+    }
+
     public TapiEquipment(List<Device> device, String uuid, List<Name> name) {
         this.device = device;
         this.uuid = uuid;

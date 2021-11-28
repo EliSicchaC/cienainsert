@@ -10,6 +10,14 @@ public class TapiTopology {
     @JsonProperty("topology")
     private List<Topology> topology;
 
+    @Override
+    public String toString() {
+        return "TapiTopology{" +
+                "nw_topology_service=" + nw_topology_service +
+                ", topology=" + topology +
+                '}';
+    }
+
     public TapiTopology(TopologyService nw_topology_service, List<Topology> topology) {
         this.nw_topology_service = nw_topology_service;
         this.topology = topology;

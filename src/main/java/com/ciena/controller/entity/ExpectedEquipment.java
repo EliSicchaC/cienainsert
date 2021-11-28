@@ -6,6 +6,13 @@ public class ExpectedEquipment {
     @JsonProperty("common-equipment-properties")
     private EquipmentProperties common_equipment_properties;
 
+    @Override
+    public String toString() {
+        return "ExpectedEquipment{" +
+                "common_equipment_properties=" + common_equipment_properties +
+                '}';
+    }
+
     public ExpectedEquipment(EquipmentProperties common_equipment_properties) {
         this.common_equipment_properties = common_equipment_properties;
     }
