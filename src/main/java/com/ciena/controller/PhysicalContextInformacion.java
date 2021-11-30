@@ -4,18 +4,14 @@ import com.ciena.controller.dao.Conexion;
 import com.ciena.controller.dao.DBRecord;
 import com.ciena.controller.dao.DBTable;
 import com.ciena.controller.entity.*;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import util.Util;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Main {
+public class PhysicalContextInformacion {
     private static Conexion.DBConnector dataBase;
     private static DBTable tablaPhysicalcontext;
     private static DBTable tablaDevice;
@@ -24,7 +20,7 @@ public class Main {
 
     //  solo esta para probar mis metodos
     public static void main(final String[] args) throws IOException {
-        Main m = new Main();
+        PhysicalContextInformacion m = new PhysicalContextInformacion();
         m.analizarInformacionPhysicalContext("D:\\archivos\\objetociena.json");
     }
     public Boolean analizarInformacionPhysicalContext(String rutaDeArchivo) throws IOException {
@@ -35,7 +31,7 @@ public class Main {
         System.out.println("INFORMACION: " + principal.getTapi_common_context().getUuid());
 
         System.out.println("--------------------IMPRIMIR service-interface-point-------- \n");
-        Main m = new Main(); // SE CREA ESTE OBJETO PARA PODER ACCEDER A LOS METODOS CREADOS
+        PhysicalContextInformacion m = new PhysicalContextInformacion(); // SE CREA ESTE OBJETO PARA PODER ACCEDER A LOS METODOS CREADOS
         // COMO ES UN ARCHIVO GRANDE, NECESITAMOS VALIDAR SI TODA LA INFO SE HA MAPEADO BIEN
         // PARA ESO CREO UN METODO imprimirServiceInterface que me va a IMPRIMIR TODO LO QUE TIENE  ESA LISTA List<ServiceInterface>(VER EL JSON0)
         try {
@@ -304,9 +300,9 @@ public class Main {
                     System.out.println(" -- operational-state: " + ownedNode.getOperational_state());
                     System.out.println("  --- tapi-equipment:supporting-access-port --- ");
                     System.out.println("   --- access-port --- ");
-                    if (null != ownedNode.getTapi_equipment_supporting_access_port() && null != ownedNode.getTapi_equipment_supporting_access_port().getAccess_port()) {
-                        System.out.println(" -- access-port-uuid: " + ownedNode.getTapi_equipment_supporting_access_port().getAccess_port().getAccess_port_uuid());
-                        System.out.println(" -- device-uuid: " + ownedNode.getTapi_equipment_supporting_access_port().getAccess_port().getDevice_uuid());
+                    if (null != ownedNode.getTapi_equipment_supporting_access_port() && null != ownedNode.getTapi_equipment_supporting_access_port().getAcces_port()) {
+                        System.out.println(" -- access-port-uuid: " + ownedNode.getTapi_equipment_supporting_access_port().getAcces_port().getAcces_port_uuid());
+                        System.out.println(" -- device-uuid: " + ownedNode.getTapi_equipment_supporting_access_port().getAcces_port().getDevice_uuid());
                     }
                     System.out.println(" --- supported-cep-layer-protocol-qualifier --- ");
                     for (String supportedlayer: ownedNode.getSupported_cep_layer_protocol_qualifier()) {
@@ -327,7 +323,7 @@ public class Main {
                                 System.out.println("  -- grid-type: " + spectrum.getFrequency_constraint().getGrid_type());
                             }
                         if (null != ownedNode.getTapi_photonic_media_media_channel_node_edge_point_spec().getMc_pool().getAvailable_spectrum())
-                            for (Spectrum available: ownedNode.getTapi_photonic_media_media_channel_node_edge_point_spec().getMc_pool().getAvailable_spectrum()) {
+                            for (AvailableSpectrum available: ownedNode.getTapi_photonic_media_media_channel_node_edge_point_spec().getMc_pool().getAvailable_spectrum()) {
                                 System.out.println(" -- upper-frequency: " + available.getUpper_frequency());
                                 System.out.println(" -- lower-frequency: " + available.getLower_frequency());
                                 System.out.println(" --- frequency-constraint --- ");
@@ -423,6 +419,51 @@ public class Main {
             System.out.println("  -- value-name: " + name.getValue_name());
             System.out.println("  -- value: " + name.getValue());
 
+        }
+    }
+    private void imprimirServiceInterface(List < ServiceInterface > parametroServiceInterface) {
+        // COMO ES UNA LISTA,  NECESITAMOS RECORRERLO, PARA ELLO USAMOS UN FOR
+        // EL FOR SE COMPONE DE 2 ELEMENTOS EL PRIMERO (ServiceInterface service :) ES LA CLASE QUE  POR CADA ITERASION ME ALMACENA LOS DATOS
+        // EL SEGUNDO ES LA LISTA QUE VOY A RECORRER, QUE EN ESTE CASO ES EL PARAMETRO parametroServiceInterface
+        for (ServiceInterface service: parametroServiceInterface) {
+            // PINTAMOS TODAS LAS PROPIEDADES QUE TIENE MI CLASE, A MODO DE EJEMPLO PINTE EL PRIMERO, SERIA IDEA PINTES TODOS
+            System.out.println("   --- uuid: " + service.getUuid() + "");
+            System.out.println("   --- Supported_layer_protocol_qualifier -- ");
+            for (String dato: service.getSupported_layer_protocol_qualifier()) {
+                System.out.println("        --- " + dato);
+            }
+            System.out.println("   --- LifecycleState: " + service.getLifecycle_state() + "");
+            System.out.println("   --- total-potential-capacity -- ");
+            System.out.println("     --- total-size:  ");
+            System.out.println("       --- unit: " + service.getTotal_potential_capacity().getTotal_size().getUnit());
+            System.out.println("       --- value: " + service.getTotal_potential_capacity().getTotal_size().getValue());
+            System.out.println("   ---LayerProtocol: " + service.getLayer_protocol_name());
+            System.out.println("   ---AdministrativeState: " + service.getAdministrative_state());
+            System.out.println("   --- available-capacity -- ");
+            if (null != service.getAvailable_capacity()) {
+                System.out.println("     --- total-size:  ");
+                System.out.println("       --- unit: " + service.getAvailable_capacity().getTotal_size().getUnit());
+                System.out.println("       --- value: " + service.getAvailable_capacity().getTotal_size().getValue());
+            }
+            System.out.println("   --- direction: " + service.getDirection());
+            System.out.println("   --- operational-state: " + service.getOperational_state());
+            System.out.println("   --- Name --- ");
+            for (Name name: service.getName()) {
+                System.out.println("    -- value-name: " + name.getValue_name());
+                System.out.println("    -- value: " + name.getValue());
+            }
+            System.out.println("    --- tapi-photonic-media:otsi-service-interface-point-spec ---     ");
+            System.out.println("        --- otsi-capability ---         ");
+            System.out.println("           --- supportable-central-frequency-spectrum-band --            ");
+            if (null != service.getTapi_photonic_media_otsi_service_interface_point_spec()) {
+                for (SupportableCentral supportableCentral: service.getTapi_photonic_media_otsi_service_interface_point_spec().getOtsi_capability().getSupportable_central_frequency_spectrum_band()) {
+                    System.out.println("           -- lower-central-frequency: " + supportableCentral.getLower_central_frequency());
+                    System.out.println("           -- upper-central-frequency: " + supportableCentral.getUpper_central_frequency());
+                    System.out.println("       --- frequency-constraint --- ");
+                    System.out.println("          -- adjustment-granularity: " + supportableCentral.getFrequency_constraint().getAdjustment_granularity());
+                    System.out.println("          -- grid-type: " + supportableCentral.getFrequency_constraint().getGrid_type());
+                }
+            }
         }
     }
 
@@ -613,49 +654,4 @@ public class Main {
 
     // SE CREA UN METODO QUE ME IMPRIMIRA TODO LO QUE TIENE UNA LISTA DE ServiceInterface, ASI COMO ESTE, DEBES CREAR UN METODO POR CADA CLASE
     // PARA VALIDAR TODO EL ARCHIVO
-    private void imprimirServiceInterface(List < ServiceInterface > parametroServiceInterface) {
-        // COMO ES UNA LISTA,  NECESITAMOS RECORRERLO, PARA ELLO USAMOS UN FOR
-        // EL FOR SE COMPONE DE 2 ELEMENTOS EL PRIMERO (ServiceInterface service :) ES LA CLASE QUE  POR CADA ITERASION ME ALMACENA LOS DATOS
-        // EL SEGUNDO ES LA LISTA QUE VOY A RECORRER, QUE EN ESTE CASO ES EL PARAMETRO parametroServiceInterface
-        for (ServiceInterface service: parametroServiceInterface) {
-            // PINTAMOS TODAS LAS PROPIEDADES QUE TIENE MI CLASE, A MODO DE EJEMPLO PINTE EL PRIMERO, SERIA IDEA PINTES TODOS
-            System.out.println("   --- uuid: " + service.getUuid() + "");
-            System.out.println("   --- Supported_layer_protocol_qualifier -- ");
-            for (String dato: service.getSupported_layer_protocol_qualifier()) {
-                System.out.println("        --- " + dato);
-            }
-            System.out.println("   --- LifecycleState: " + service.getLifecycle_state() + "");
-            System.out.println("   --- total-potential-capacity -- ");
-            System.out.println("     --- total-size:  ");
-            System.out.println("       --- unit: " + service.getTotal_potential_capacity().getTotal_size().getUnit());
-            System.out.println("       --- value: " + service.getTotal_potential_capacity().getTotal_size().getValue());
-            System.out.println("   ---LayerProtocol: " + service.getLayer_protocol_name());
-            System.out.println("   ---AdministrativeState: " + service.getAdministrative_state());
-            System.out.println("   --- available-capacity -- ");
-            if (null != service.getAvailable_capacity()) {
-                System.out.println("     --- total-size:  ");
-                System.out.println("       --- unit: " + service.getAvailable_capacity().getTotal_size().getUnit());
-                System.out.println("       --- value: " + service.getAvailable_capacity().getTotal_size().getValue());
-            }
-            System.out.println("   --- direction: " + service.getDirection());
-            System.out.println("   --- operational-state: " + service.getOperational_state());
-            System.out.println("   --- Name --- ");
-            for (Name name: service.getName()) {
-                System.out.println("    -- value-name: " + name.getValue_name());
-                System.out.println("    -- value: " + name.getValue());
-            }
-            System.out.println("    --- tapi-photonic-media:otsi-service-interface-point-spec ---     ");
-            System.out.println("        --- otsi-capability ---         ");
-            System.out.println("           --- supportable-central-frequency-spectrum-band --            ");
-            if (null != service.getTapi_photonic_media_otsi_service_interface_point_spec()) {
-                for (SupportableCentral supportableCentral: service.getTapi_photonic_media_otsi_service_interface_point_spec().getOtsi_capability().getSupportable_central_frequency_spectrum_band()) {
-                    System.out.println("           -- lower-central-frequency: " + supportableCentral.getLower_central_frequency());
-                    System.out.println("           -- upper-central-frequency: " + supportableCentral.getUpper_central_frequency());
-                    System.out.println("       --- frequency-constraint --- ");
-                    System.out.println("          -- adjustment-granularity: " + supportableCentral.getFrequency_constraint().getAdjustment_granularity());
-                    System.out.println("          -- grid-type: " + supportableCentral.getFrequency_constraint().getGrid_type());
-                }
-            }
-        }
-    }
 }

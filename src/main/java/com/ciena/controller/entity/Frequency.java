@@ -8,6 +8,14 @@ public class Frequency {
     @JsonProperty("grid-type")
     private String grid_type;
 
+    @Override
+    public String toString() {
+        return "Frequency{" +
+                "adjustment_granularity='" + adjustment_granularity + '\'' +
+                ", grid_type='" + grid_type + '\'' +
+                '}';
+    }
+
     public Frequency(String adjustment_granularity, String grid_type) {
         this.adjustment_granularity = adjustment_granularity;
         this.grid_type = grid_type;

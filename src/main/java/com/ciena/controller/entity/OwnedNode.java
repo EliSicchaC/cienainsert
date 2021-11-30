@@ -28,6 +28,23 @@ public class OwnedNode {
     @JsonProperty("tapi-photonic-media:media-channel-node-edge-point-spec")
     private TapiPhotonic tapi_photonic_media_media_channel_node_edge_point_spec;
 
+    @Override
+    public String toString() {
+        return "OwnedNode{" +
+                "uuid='" + uuid + '\'' +
+                ", termination_state='" + termination_state + '\'' +
+                ", termination_direction='" + termination_direction + '\'' +
+                ", layer_protocol_name='" + layer_protocol_name + '\'' +
+                ", lifecycle_state='" + lifecycle_state + '\'' +
+                ", name=" + name +
+                ", operational_state='" + operational_state + '\'' +
+                ", tapi_equipment_supporting_access_port=" + tapi_equipment_supporting_access_port +
+                ", supported_cep_layer_protocol_qualifier=" + supported_cep_layer_protocol_qualifier +
+                ", administrative_state='" + administrative_state + '\'' +
+                ", tapi_photonic_media_media_channel_node_edge_point_spec=" + tapi_photonic_media_media_channel_node_edge_point_spec +
+                '}';
+    }
+
     public OwnedNode(String uuid, String termination_state, String termination_direction, String layer_protocol_name, String lifecycle_state, List<Name> name, String operational_state, SupportingAcces tapi_equipment_supporting_access_port, List<String> supported_cep_layer_protocol_qualifier, String administrative_state, TapiPhotonic tapi_photonic_media_media_channel_node_edge_point_spec) {
         this.uuid = uuid;
         this.termination_state = termination_state;

@@ -8,6 +8,14 @@ public class AccesPort {
     @JsonProperty("device-uuid")
     private String device_uuid;
 
+    @Override
+    public String toString() {
+        return "AccesPort{" +
+                "access_port_uuid='" + access_port_uuid + '\'' +
+                ", device_uuid='" + device_uuid + '\'' +
+                '}';
+    }
+
     public AccesPort(String access_port_uuid, String device_uuid) {
         this.access_port_uuid = access_port_uuid;
         this.device_uuid = device_uuid;
@@ -15,7 +23,7 @@ public class AccesPort {
     public AccesPort(){
     }
 
-    public String getAccess_port_uuid() {
+    public String getAcces_port_uuid() {
         return access_port_uuid;
     }
 

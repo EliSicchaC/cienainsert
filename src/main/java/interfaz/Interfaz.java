@@ -1,13 +1,13 @@
 package interfaz;
 
-import com.ciena.controller.Main;
+import com.ciena.controller.PhysicalContextInformacion;
+import com.ciena.controller.TopologyInformacion;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -76,10 +76,12 @@ public class Interfaz extends JFrame {
 
                     if (path != "") {
                         analizando.setVisible(true);
-                        Main ejecutor = new Main();
+                        PhysicalContextInformacion physicalContextInformacion = new PhysicalContextInformacion();
+                        TopologyInformacion topologyInformacion = new TopologyInformacion();
                         try {
-                            Boolean estadoProceso = ejecutor.analizarInformacionPhysicalContext(path);
-                            if (estadoProceso) {
+                            Boolean estadoProceso = physicalContextInformacion.analizarInformacionPhysicalContext(path);
+                            Boolean proceso = topologyInformacion.analizarInformacionTopoloyContext(path);
+                            if (estadoProceso && proceso) {
                                 analizando.setText("Proceso exitoso!");
                             }else{
                                 analizando.setText("Proceso Fallido!");

@@ -2,7 +2,7 @@ package com.ciena.controller.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Spectrum {
+public class AvailableSpectrum {
     @JsonProperty("upper-frequency")
     private int upper_frequency;
     @JsonProperty("lower-frequency")
@@ -12,19 +12,19 @@ public class Spectrum {
 
     @Override
     public String toString() {
-        return "Spectrum{" +
+        return "AvailableSpectrum{" +
                 "upper_frequency=" + upper_frequency +
                 ", lower_frequency=" + lower_frequency +
                 ", frequency_constraint=" + frequency_constraint +
                 '}';
     }
 
-    public Spectrum(int upper_frequency, int lower_frequency, Frequency frequency_constraint) {
+    public AvailableSpectrum(int upper_frequency, int lower_frequency, Frequency frequency_constraint) {
         this.upper_frequency = upper_frequency;
         this.lower_frequency = lower_frequency;
         this.frequency_constraint = frequency_constraint;
     }
-    public Spectrum(){
+    public AvailableSpectrum(){
     }
 
     public int getUpper_frequency() {

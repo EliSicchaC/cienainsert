@@ -10,6 +10,15 @@ public class NodeEdge {
     @JsonProperty("node-edge-point-uuid")
     private String node_edge_point_uuid;
 
+    @Override
+    public String toString() {
+        return "NodeEdge{" +
+                "topology_uuid='" + topology_uuid + '\'' +
+                ", node_uuid='" + node_uuid + '\'' +
+                ", node_edge_point_uuid='" + node_edge_point_uuid + '\'' +
+                '}';
+    }
+
     public NodeEdge(String topology_uuid, String node_uuid, String node_edge_point_uuid) {
         this.topology_uuid = topology_uuid;
         this.node_uuid = node_uuid;
