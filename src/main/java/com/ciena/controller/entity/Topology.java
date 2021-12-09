@@ -1,7 +1,11 @@
 package com.ciena.controller.entity;
 
+import com.ciena.controller.dao.DBRecord;
+import com.ciena.controller.dao.DBTable;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import util.Util;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class Topology {
@@ -75,5 +79,23 @@ public class Topology {
 
     public void setLayer_protocol_name(List<String> layer_protocol_name) {
         this.layer_protocol_name = layer_protocol_name;
+    }
+
+    public Boolean insertaTopology(List<Topology> topologies, DBTable tablaTopology){
+        for(Topology topology : topologies){
+            DBRecord record = tablaTopology.newRecord();
+            record.addField("uuid", topology.getUuid());
+            String nameStringValue = Util.generarNames(topology.getName());
+            System.out.println("nameStringValue: " + nameStringValue);
+            record.addField("name", nameStringValue);
+            record.addField("layer_protocol_name", topology.getLayer_protocol_name().toString());
+            try {
+                tablaTopology.insert(record);
+            } catch (SQLException e) {
+                System.out.println("Ex: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

@@ -80,8 +80,8 @@ public class Interfaz extends JFrame {
                         TopologyInformacion topologyInformacion = new TopologyInformacion();
                         try {
                             Boolean estadoProceso = physicalContextInformacion.analizarInformacionPhysicalContext(path);
-                            Boolean proceso = topologyInformacion.analizarInformacionTopoloyContext(path);
-                            if (estadoProceso && proceso) {
+                            //Boolean proceso = topologyInformacion.analizarInformacionTopoloyContext(path);
+                            if (estadoProceso) {
                                 analizando.setText("Proceso exitoso!");
                             }else{
                                 analizando.setText("Proceso Fallido!");

@@ -1,6 +1,10 @@
 package com.ciena.controller.entity;
 
+import com.ciena.controller.dao.DBRecord;
+import com.ciena.controller.dao.DBTable;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.sql.SQLException;
 
 public class AccesPort {
     @JsonProperty("access-port-uuid")
@@ -37,5 +41,24 @@ public class AccesPort {
 
     public void setDevice_uuid(String device_uuid) {
         this.device_uuid = device_uuid;
+    }
+
+    public Boolean analizoAccsessPort(DBTable tablaAccessPort,String access_port_uuid,String device_uuid){
+        DBRecord record = tablaAccessPort.newRecord();
+        if(null != access_port_uuid){
+            record.addField("access_port_uuid", access_port_uuid);
+        }
+        if(null != device_uuid){
+            record.addField("device_uuid",device_uuid);
+        }
+
+
+        try {
+            tablaAccessPort.insert(record);
+        } catch (SQLException e) {
+            System.out.println("Ex: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 }

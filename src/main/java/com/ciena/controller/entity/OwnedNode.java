@@ -1,7 +1,11 @@
 package com.ciena.controller.entity;
 
+import com.ciena.controller.dao.DBRecord;
+import com.ciena.controller.dao.DBTable;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import util.Util;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class OwnedNode {
@@ -147,5 +151,31 @@ public class OwnedNode {
 
     public void setTapi_photonic_media_media_channel_node_edge_point_spec(TapiPhotonic tapi_photonic_media_media_channel_node_edge_point_spec) {
         this.tapi_photonic_media_media_channel_node_edge_point_spec = tapi_photonic_media_media_channel_node_edge_point_spec;
+    }
+    public Boolean analizarOwnedNode(List<OwnedNode>ownedNodeList, DBTable tablaOwnedNode,String topology_uuid,String node_uuid){
+        DBRecord record = tablaOwnedNode.newRecord();
+        for(OwnedNode ownedNode : ownedNodeList){
+            record = tablaOwnedNode.newRecord();
+            record.addField("uuid",ownedNode.getUuid());
+            record.addField("termination_state",ownedNode.getTermination_state());
+            record.addField("termination_direction",ownedNode.getTermination_direction());
+            record.addField("layer_protocol_name",ownedNode.getLayer_protocol_name());
+            record.addField("lifecycle_state",ownedNode.getLifecycle_state());
+            String nameStringValue = Util.generarNames(ownedNode.getName());
+            System.out.println("nameStringValue: " + nameStringValue);
+            record.addField("name", nameStringValue);
+            record.addField("operational_state",ownedNode.getOperational_state());
+            record.addField("supported_cep_layer_protocol_qualifier",ownedNode.getSupported_cep_layer_protocol_qualifier().toString());
+            record.addField("administrative_state",ownedNode.getAdministrative_state());
+            record.addField("uuid_topology",topology_uuid);
+            record.addField("uuid_node",node_uuid);
+            try {
+                tablaOwnedNode.insert(record);
+            } catch (SQLException e) {
+                System.out.println("Ex: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

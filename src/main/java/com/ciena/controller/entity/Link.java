@@ -1,7 +1,10 @@
 package com.ciena.controller.entity;
 
+import com.ciena.controller.dao.DBRecord;
+import com.ciena.controller.dao.DBTable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class Link {
@@ -111,5 +114,29 @@ public class Link {
 
     public void setLayer_protocol_name(List<String> layer_protocol_name) {
         this.layer_protocol_name = layer_protocol_name;
+    }
+    public Boolean analizoLink(List<Link>links, DBTable tablaLink,String topology_uuid){
+        DBRecord record = tablaLink.newRecord();
+        for (Link link : links){
+            record = tablaLink.newRecord();
+            record.addField("uuid", link.getUuid());
+            if(null != link && null != link.getNode_edge_point()){
+                record.addField("node_edge_point", link.getNode_edge_point().toString());
+            }
+            record.addField("lifecycle_state", link.getLifecycle_state());
+            record.addField("name", link.getName().toString());
+            record.addField("operational_state", link.getOperational_state());
+            record.addField("administrative_state", link.getAdministrative_state());
+            record.addField("direction", link.getDirection());
+            record.addField("layer_protocol_name", link.getLayer_protocol_name().toString());
+            record.addField("uuid_topology",topology_uuid);
+            try {
+                tablaLink.insert(record);
+            } catch (SQLException e) {
+                System.out.println("Ex: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

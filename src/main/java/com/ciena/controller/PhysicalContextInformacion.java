@@ -101,7 +101,7 @@ public class PhysicalContextInformacion {
                 "varchar(250)"
         }
         };
-        //TAREA CREAR TABLAS FALTANTES
+
         //tablaDevice = dataBase.deleteTableIfExsist("exp_device");
         tablaDevice.createTable(fields);
 

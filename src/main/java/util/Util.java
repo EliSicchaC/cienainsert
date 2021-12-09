@@ -1,17 +1,27 @@
 package util;
 
+import com.ciena.controller.TopologyInformacion;
 import com.ciena.controller.dao.Conexion;
+import com.ciena.controller.dao.DBRecord;
 import com.ciena.controller.dao.DBTable;
 import com.ciena.controller.entity.Name;
 import com.ciena.controller.entity.ObjetosPrincipales;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public  class Util {
     public static ObjetosPrincipales getObjetosPrincipales(String rutaDeArchivo) throws IOException {
@@ -45,4 +55,59 @@ public  class Util {
         tabla.createTable(fields);
         return tabla;
     }
+    public static DBTable crearTablasGenericoMap(Conexion.DBConnector dataBase, String nombreTabla, DBTable tabla, Map<String, String> fields) throws SQLException, ClassNotFoundException {
+        //PASO 1 ELIMINAR LA TABLA ANTERIOR
+        tabla = dataBase.deleteTableIfExsist(nombreTabla);
+        tabla.createTableMap(fields);
+        return tabla;
+    }
+    //TRANSFORMA A JSONOBJECT
+    public static JSONObject parseJSONFile(String filename) throws IOException {
+        String contenido = new String(Files.readAllBytes(Paths.get(filename)));
+        return new JSONObject(contenido);
+    }
+
+    public static JSONObject retonarListaPropiedadesAsociadasNodoHijo(JSONObject archivoJson, String nodoPadre, String nodoHijoPrimerSegmento ){
+        JSONObject propiedades = null;
+        try {
+            propiedades = archivoJson.getJSONObject(nodoPadre)
+                    .getJSONObject(nodoHijoPrimerSegmento);
+
+        } catch (Exception exception) {
+            System.out.println("error:: " + exception.getMessage());
+        }
+         return propiedades;
+    }
+
+    public static List < String > listaDeColumnasPadreArray(JSONArray nodoConLasColumnas, String nodo) {
+        List < String > listaDeColumnas = new ArrayList < > ();
+        for (Object objetosNode: nodoConLasColumnas) {
+            JSONObject ownedNode = (JSONObject) objetosNode;
+            JSONArray listaDeEdgePoint = ownedNode.getJSONArray(nodo);
+            for (Object objetoEvaluado: listaDeEdgePoint) {
+                JSONObject objetoEvaluadoJson = (JSONObject) objetoEvaluado;
+                Map < String, Object > objectMap = objetoEvaluadoJson.toMap();
+                for (Map.Entry < String, Object > entry: objectMap.entrySet()) {
+                    listaDeColumnas.add(entry.getKey());
+                }
+            }
+        }
+        return listaDeColumnas;
+
+    }
+    public static List < String > listaDeColumnasPadreObject(JSONObject nodoConLasColumnas, String nodo) {
+        List < String > listaDeColumnas = new ArrayList < > ();
+        JSONArray listaDeEdgePoint = nodoConLasColumnas.getJSONArray(nodo);
+        for (Object objetoEvaluado: listaDeEdgePoint) {
+            JSONObject objetoEvaluadoJson = (JSONObject) objetoEvaluado;
+            Map < String, Object > objectMap = objetoEvaluadoJson.toMap();
+            for (Map.Entry < String, Object > entry: objectMap.entrySet()) {
+                listaDeColumnas.add(entry.getKey());
+            }
+        }
+
+        return listaDeColumnas;
+
+    }
+
 }

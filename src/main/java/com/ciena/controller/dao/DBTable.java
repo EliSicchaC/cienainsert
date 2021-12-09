@@ -3,6 +3,7 @@ package com.ciena.controller.dao;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 
 public class DBTable {
     String tableName;
@@ -28,6 +29,22 @@ public class DBTable {
         for (String[] field : fields) {
             System.out.println(field[0] + ":" + field[1]);
             sql.append("\n" + prefix + field[0] + " " + field[1]);
+            prefix = "  ,";
+        }
+        sql.append("\n)");
+        System.out.println("sql: " + sql);
+        Statement stmt = conn.createStatement();
+
+        if (recreateTables == 1) {
+            stmt.execute(sql.toString());
+        }
+    }
+    public void createTableMap(Map<String, String> fields) throws SQLException {
+        StringBuffer sql = new StringBuffer("CREATE TABLE " + tableName + " (");
+        //EN SQL VA EL NOMBRE Y TIPO DE DATO Y TAMBIEN \n(CODIGO ASCCI) SIGNIFICA SALTO DE LINEA
+        String prefix = "id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, \n";
+        for (Map.Entry<String, String> entry : fields.entrySet()) {
+            sql.append("\n" + prefix + entry.getKey() + " " +entry.getValue());
             prefix = "  ,";
         }
         sql.append("\n)");

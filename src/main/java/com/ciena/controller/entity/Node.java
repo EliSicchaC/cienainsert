@@ -1,7 +1,11 @@
 package com.ciena.controller.entity;
 
+import com.ciena.controller.dao.DBRecord;
+import com.ciena.controller.dao.DBTable;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import util.Util;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class Node {
@@ -75,5 +79,26 @@ public class Node {
 
     public void setOwned_node_edge_point(List<OwnedNode> owned_node_edge_point) {
         this.owned_node_edge_point = owned_node_edge_point;
+    }
+    //SE CREA UN NUEVO OBJETO
+    public Boolean insertaNode(List<Node>nodes,DBTable tablaNode,String topology_uuid){
+        DBRecord record = tablaNode.newRecord();
+        for(Node node : nodes){
+            record = tablaNode.newRecord();
+            record.addField("uuid", node.getUuid());
+            record.addField("lifecycle_state",node.getLifecycle_state());
+            String nameStringValue = Util.generarNames(node.getName());
+            System.out.println("nameStringValue: " + nameStringValue);
+            record.addField("name", nameStringValue);
+            record.addField("operational_state",node.getOperational_state());
+            record.addField("uuid_topology",topology_uuid);
+            try {
+                tablaNode.insert(record);
+            } catch (SQLException e) {
+                System.out.println("Ex: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

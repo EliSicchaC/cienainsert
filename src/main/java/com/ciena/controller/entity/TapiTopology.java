@@ -40,4 +40,6 @@ public class TapiTopology {
     public void setTopology(List<Topology> topology) {
         this.topology = topology;
     }
+
+
 }
