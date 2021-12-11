@@ -96,30 +96,37 @@ public class LinkMain {
             }
         }
         DBRecord record = tablaLink.newRecord();
-        for (Object objetosLink : evaluarALink) {
+        for (Object objetosLink : evaluarALink){
             JSONObject topologyLink = (JSONObject) objetosLink;
             String columnaUuid = topologyLink.get("uuid").toString();
-            JSONArray listTopology = topologyLink.getJSONArray(link);
-            for (Object objectEvaluado : listTopology) {
-                JSONObject objetosEvaluadoDeJson = (JSONObject) objectEvaluado;
-                Map<String, Object> objetosMap = objetosEvaluadoDeJson.toMap();
-                record = tablaLink.newRecord();
-                for (Map.Entry<String, Object> entry : objetosMap.entrySet()) {
-                    if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()) {
-                        record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"), entry.getValue().toString());
-                    } else {
-                        record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"), null);
+            JSONArray listLink = topologyLink.getJSONArray(link);
+            for (Object objectEvaluado : listLink) {
+                JSONObject objetos = (JSONObject) objectEvaluado;
+                //ME POSICIONO EN EL NODE EDGE POINT
+                JSONArray node = objetos.getJSONArray("node-edge-point");
+                //RECORRO TODO LO QUE TIENE NODE EDGE POINT
+                for(Object objectNode : node){
+                    JSONObject objetosEvaluadoDeJson = (JSONObject) objectNode;
+                    //NO TIENE PORQUE ESTAR OBJETOSEVALUADOJSON PORQUE NO QUIERO RECORRER NODE SI NO LINK
+                    Map<String, Object> objetosMap = objetos.toMap();
+                    record = tablaLink.newRecord();
+                    for (Map.Entry<String, Object> entry : objetosMap.entrySet()){
+                        if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()){
+                            record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), entry.getValue().toString());
+                        } else {
+                            record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), null);
+                        }
                     }
-                }
-                try {
-                    record.addField("uuid_topology", columnaUuid);
-                    tablaLink.insert(record);
+                    try {
+                        record.addField("uuid_topology", columnaUuid);
+                        record.addField("uuid_ownedNodePoint", objetosEvaluadoDeJson.get("node-edge-point-uuid").toString());
+                        tablaLink.insert(record);
 
-                } catch (SQLException exception) {
-                    exception.printStackTrace();
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
+                    }
                 }
             }
         }
-
     }
 }

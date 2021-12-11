@@ -78,18 +78,18 @@ public class Interfaz extends JFrame {
                         analizando.setVisible(true);
                         PhysicalContextInformacion physicalContextInformacion = new PhysicalContextInformacion();
                         TopologyInformacion topologyInformacion = new TopologyInformacion();
-                        try {
+                        /*try {
                             Boolean estadoProceso = physicalContextInformacion.analizarInformacionPhysicalContext(path);
-                            //Boolean proceso = topologyInformacion.analizarInformacionTopoloyContext(path);
+                            Boolean proceso = topologyInformacion.analizarInformacionTopoloyContext(path);
                             if (estadoProceso) {
                                 analizando.setText("Proceso exitoso!");
                             }else{
                                 analizando.setText("Proceso Fallido!");
                             }
-                        } catch (IOException ex) {
+                         catch (IOException ex) {
                             analizando.setText("Proceso Fallido!");
                             ex.printStackTrace();
-                        }
+                        }*/
                     }
                 }
             }
