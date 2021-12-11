@@ -33,7 +33,7 @@ public class NodeMain {
     }
     public void diccionarioNode(String lugarDelArchivo,String tapiContext,String tapiTopology,String topology,String node) throws SQLException, ClassNotFoundException {
 
-        Map<String, String> dic_Node = new HashMap<>();
+        Map<String, String> exp_node = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();
         JSONArray EvaluarANode = null;
         try{
@@ -66,12 +66,17 @@ public class NodeMain {
         };
         listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
         for (String objectos : listaDeColumnas){
-            dic_Node.put(objectos.replaceAll("-","_").replaceAll(":","_"), "MEDIUMTEXT");
+            String nombreColumna = objectos.replaceAll("-","_").replaceAll(":","_");
+            if(nombreColumna.equals("uuid")){
+                exp_node.put(nombreColumna, "varchar(50) primary key ");
+            }else{
+                exp_node.put(nombreColumna,"MEDIUMTEXT");
+            }
         }
-        dic_Node.put("uuid_topology","varchar(250)");
+        exp_node.put("uuid_topology","varchar(250) , FOREIGN KEY  (uuid_topology) REFERENCES exp_topology(uuid)");
         dataBase = new Conexion.DBConnector();
         tablaDicNode = Util.crearTablasGenerico(dataBase,"dic_topology_node",tablaDicNode,dicNode);
-        tablaNode = Util.crearTablasGenericoMap(dataBase,"exp_topology_node",tablaNode,dic_Node);
+        tablaNode = Util.crearTablasGenericoMap(dataBase,"exp_topology_node",tablaNode,exp_node);
         DBRecord recorre = tablaNode.newRecord();
         for(String objetos : listaDeColumnas){
             recorre = tablaDicNode.newRecord();

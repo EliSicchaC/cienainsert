@@ -615,43 +615,4 @@ public class PhysicalContextInformacion {
 
     }
 
-
-  /*
-            for (Equipment equipment : device.getEquipment()){
-                System.out.println(" -- uuid: " + equipment.getUuid());
-                for (Name name : equipment.getName()){
-                    System.out.println(" -- value-name: " + name.getValue_name());
-                    System.out.println(" -- value: " + name.getValue());
-                }
-                System.out.println(" -- expected-equipment -- ");
-                for (ExpectedEquipment expectedEquipment : equipment.getExpected_equipment()){
-                    System.out.println(" --common-equipment --");
-                    System.out.println(" -- equipment-type: " + expectedEquipment.getCommon_equipment_properties().getEquipment_type_version());
-                    System.out.println(" -- manufacturer-name: " + expectedEquipment.getCommon_equipment_properties().getManufacturer_name());
-                    System.out.println(" -- equipment-type-name: " + expectedEquipment.getCommon_equipment_properties().getEquipment_type_name());
-                }
-                System.out.println(" -- Actual-Equipment -- ");
-                System.out.println("    -- common-equipment -- ");
-                System.out.println("      -- equipment-type: " + equipment.getActual_equipment().getCommon_equipment_properties().getEquipment_type_version());
-                System.out.println("      -- manufacturer: " + equipment.getActual_equipment().getCommon_equipment_properties().getManufacturer_name());
-                System.out.println("      -- equipment-name: " + equipment.getActual_equipment().getCommon_equipment_properties().getEquipment_type_name());
-                System.out.println(" -- category: " + equipment.getCategory());
-                System.out.println(" -- is-expected: " + equipment.isIs_expected_actual_mismatch());
-
-            }
-            for (Name name : device.getName()){
-                System.out.println(" -- Name --");
-                System.out.println("  -- value-name: " + name.getValue_name());
-                System.out.println("  -- value: " + name.getValue());
-            }
-        }
-        System.out.println(" -- uuid: " + tapiEquipment.getUuid());
-        for (Name name : tapiEquipment.getName()){
-            System.out.println(" -- Name --");
-            System.out.println("   -- value-name: " + name.getValue_name());
-            System.out.println("   -- value: " + name.getValue());
-        }*/
-
-    // SE CREA UN METODO QUE ME IMPRIMIRA TODO LO QUE TIENE UNA LISTA DE ServiceInterface, ASI COMO ESTE, DEBES CREAR UN METODO POR CADA CLASE
-    // PARA VALIDAR TODO EL ARCHIVO
 }

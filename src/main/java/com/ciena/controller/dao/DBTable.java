@@ -42,7 +42,7 @@ public class DBTable {
     public void createTableMap(Map<String, String> fields) throws SQLException {
         StringBuffer sql = new StringBuffer("CREATE TABLE " + tableName + " (");
         //EN SQL VA EL NOMBRE Y TIPO DE DATO Y TAMBIEN \n(CODIGO ASCCI) SIGNIFICA SALTO DE LINEA
-        String prefix = "id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, \n";
+        String prefix = " ";
         for (Map.Entry<String, String> entry : fields.entrySet()) {
             sql.append("\n" + prefix + entry.getKey() + " " +entry.getValue());
             prefix = "  ,";
@@ -53,9 +53,17 @@ public class DBTable {
 
         if (recreateTables == 1) {
             stmt.execute(sql.toString());
+            agregarPrimaryKey();
         }
     }
+    public void agregarPrimaryKey() throws SQLException {
+        String prefix = "  ALTER TABLE " + tableName +   " ADD `id` INT(11) UNIQUE NOT NULL AUTO_INCREMENT FIRST   ";
+        Statement stmt = conn.createStatement();
 
+        if (recreateTables == 1) {
+            stmt.execute(prefix.toString());
+        }
+    }
     public DBRecord newRecord() {
         return new DBRecord(tableName);
     }

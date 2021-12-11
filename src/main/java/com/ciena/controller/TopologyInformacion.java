@@ -207,67 +207,6 @@ public class TopologyInformacion {
         tablaLink = Util.crearTablasGenerico(dataBase,"exp_topology_link",tablaLink,link);
     }
 
-    private void insertarTopology(TapiTopology topologycontext){
-        //SE CREA UN NUEVO OBJETO Y SE COLOGA LOS PARAMETROS RESPECTIVOS
-        //EN LOS PARAMETROS NO SE COLOCA EL TIPO DE DATO, SOLO LO QUE QUIERES TRAER
-        Topology topology = new Topology();
-        topology.insertaTopology(topologycontext.getTopology(),tablaTopology);
-    }
-    private void insertarNode(TapiTopology nodecontext){
-        for(Topology topology : nodecontext.getTopology()){
-            Node node = new Node();
-            node.insertaNode(topology.getNode(),tablaNode,topology.getUuid());
-        }
-    }
-    private void insertarOwnedNode(TapiTopology ownednode){
-        for(Topology topology : ownednode.getTopology()){
-            DBRecord record = tablaOwnedNode.newRecord();
-            for(Node node : topology.getNode()){
-                record = tablaOwnedNode.newRecord();
-                OwnedNode ownedNode = new OwnedNode();
-                ownedNode.analizarOwnedNode(node.getOwned_node_edge_point(),tablaOwnedNode,topology.getUuid(),node.getUuid());
-            }
-        }
-    }
-    private void insertarAccessPort(TapiTopology accessportcontext){
-        for(Topology topology : accessportcontext.getTopology()){
-            DBRecord record = tablaAccessPort.newRecord();
-            for(Node node : topology.getNode()){
-                record = tablaAccessPort.newRecord();
-                for(OwnedNode ownedNode : node.getOwned_node_edge_point()){
-                    record = tablaAccessPort.newRecord();
-                    AccesPort accesPort = new AccesPort();
-                    if (null != ownedNode.getTapi_equipment_supporting_access_port() && null != ownedNode.getTapi_equipment_supporting_access_port().getAcces_port()){
-                        accesPort.analizoAccsessPort(tablaAccessPort,ownedNode.getTapi_equipment_supporting_access_port().getAcces_port().getAcces_port_uuid(),ownedNode.getTapi_equipment_supporting_access_port().getAcces_port().getDevice_uuid());
-                    }
-                }
-            }
-        }
-    }
-    private void insertarMcPool(TapiTopology mcpool){
-        for (Topology topology : mcpool.getTopology()){
-            DBRecord record = tablaMcPool.newRecord();
-            for (Node node : topology.getNode()){
-                record = tablaMcPool.newRecord();
-                for (OwnedNode ownedNode : node.getOwned_node_edge_point()){
-                    record = tablaMcPool.newRecord();
-                    McPool mcPool = new McPool();
-                    if (null != ownedNode.getTapi_photonic_media_media_channel_node_edge_point_spec()){
-                        mcPool.analizaMcPool(tablaMcPool,ownedNode.getUuid(),ownedNode.getTapi_photonic_media_media_channel_node_edge_point_spec().getMc_pool().getSupportable_spectrum(),
-                                ownedNode.getTapi_photonic_media_media_channel_node_edge_point_spec().getMc_pool().getAvailable_spectrum());
-                    }
-                }
-            }
-        }
-    }
-    private void insertarLink(TapiTopology linkcontext){
-        for (Topology topology : linkcontext.getTopology()){
-            DBRecord record = tablaLink.newRecord();
-            Link link = new Link();
-            link.analizoLink(topology.getLink(),tablaLink,topology.getUuid());
-        }
-    }
-
     private Boolean insertarDiccionarioOwned(List<String> listaDeColumnas, Conexion.DBConnector dataBase){
         String[][] ownedpoint = new String[][]{
                 {
@@ -310,9 +249,14 @@ public class TopologyInformacion {
         Map < String, String > tablaOwned = new HashMap();
         for (String objectos: listaDeColumnas) {
             //INSERTANDO DATA
-            tablaOwned.put(objectos.replaceAll("-", "_").replaceAll(":", "_"), "MEDIUMTEXT");
+            String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
+            if(nombreColumna.equals("uuid")){
+                tablaOwned.put(nombreColumna, "varchar(50) primary key ");
+            }else{
+                tablaOwned.put(nombreColumna,"MEDIUMTEXT");
+            }
         }
-        tablaOwned.put("uuid_node", "varchar(250)");
+        tablaOwned.put("uuid_node", "varchar(250) , FOREIGN KEY  (uuid_node) REFERENCES exp_topology_node(uuid)");
         try {
             tablaOwnedNode = Util.crearTablasGenericoMap(dataBase, "exp_topology_owned_node_edgepoint", tablaOwnedNode, tablaOwned);
             DBRecord record = tablaOwnedNode.newRecord();
@@ -347,7 +291,7 @@ public class TopologyInformacion {
 
     public void diccionarioOwned(String lugarDelArchivo, String tapiContext, String tapiTopology,
                                  String topology, String node, String ownedPoint) throws SQLException, ClassNotFoundException {
-        TopologyInformacion mainTopology = new TopologyInformacion();
+
         Map<String, String> tablaOwned = new HashMap();
         List<String> listaDeColumnas = new ArrayList<>();
         JSONArray EvaluarANode = null;

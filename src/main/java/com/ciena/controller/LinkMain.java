@@ -37,14 +37,14 @@ public class LinkMain {
     }
     public void diccionarioLink(String lugarDelArchivo, String tapiContext,String tapiTopology,String topology,String link) throws SQLException, ClassNotFoundException {
 
-        Map<String, String> dic_Link = new HashMap<>();
+        Map<String, String> exp_Link = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();
-        JSONArray EvaluarALink = null;
+        JSONArray evaluarALink = null;
         try{
             JSONObject json = Util.parseJSONFile(lugarDelArchivo);
             JSONObject identifica = json.getJSONObject(tapiContext).
                     getJSONObject(tapiTopology);
-            EvaluarALink = identifica.getJSONArray(topology);
+            evaluarALink = identifica.getJSONArray(topology);
             JSONArray identificaElementos = identifica.getJSONArray(topology);
             for(Object objetos : identificaElementos){
                 JSONObject lineaDeElementos = (JSONObject) objetos;
@@ -69,12 +69,21 @@ public class LinkMain {
         };
         listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
         for (String objectos : listaDeColumnas){
-            dic_Link.put(objectos.replaceAll("-","_").replaceAll(":","_"), "MEDIUMTEXT");
+            String nombreColumna = objectos.replaceAll("-","_").replaceAll(":","_");
+            /* SOLO SIRVE PARA PRIMERY KEY PORQUE LO QUE QUEREMOS ES VALIDAR SI AQUELLA COLUMNA EXISTE EN LA TABLA*/
+            if(nombreColumna.equals("uuid")){
+                exp_Link.put(nombreColumna, "varchar(50) primary key ");
+            }else{
+                exp_Link.put(nombreColumna,"MEDIUMTEXT");
+            }
         }
-        dic_Link.put("uuid_topology","varchar(250)");
+        //FOREIGN KEY  (NOMBRE) REFERENCES NOMBREDELATABLA(QUEQUIEREDELATABLA)
+        exp_Link.put("uuid_topology","varchar(250) , FOREIGN KEY  (uuid_topology) REFERENCES exp_topology(uuid) ");
+        exp_Link.put("uuid_ownedNodePoint","varchar(250)");
         dataBase = new Conexion.DBConnector();
+        //APARTIR DE AQUI SE CREA LA TABLA, SI NO ENTONCES NO FUNCIONARA EL FOREIGN KEY
         tablaDicLink = Util.crearTablasGenerico(dataBase,"dic_topology_link",tablaDicLink,dicLink);
-        tablaLink = Util.crearTablasGenericoMap(dataBase,"exp_topology_link",tablaLink,dic_Link);
+        tablaLink = Util.crearTablasGenericoMap(dataBase,"exp_topology_link",tablaLink,exp_Link);
         DBRecord recorre = tablaDicLink.newRecord();
         for(String objetos : listaDeColumnas){
             recorre = tablaDicLink.newRecord();
@@ -87,7 +96,7 @@ public class LinkMain {
             }
         }
         DBRecord record = tablaLink.newRecord();
-        for (Object objetosLink : EvaluarALink){
+        for (Object objetosLink : evaluarALink) {
             JSONObject topologyLink = (JSONObject) objetosLink;
             String columnaUuid = topologyLink.get("uuid").toString();
             JSONArray listTopology = topologyLink.getJSONArray(link);
@@ -95,11 +104,11 @@ public class LinkMain {
                 JSONObject objetosEvaluadoDeJson = (JSONObject) objectEvaluado;
                 Map<String, Object> objetosMap = objetosEvaluadoDeJson.toMap();
                 record = tablaLink.newRecord();
-                for (Map.Entry<String, Object> entry : objetosMap.entrySet()){
-                    if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()){
-                        record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), entry.getValue().toString());
+                for (Map.Entry<String, Object> entry : objetosMap.entrySet()) {
+                    if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()) {
+                        record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"), entry.getValue().toString());
                     } else {
-                        record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), null);
+                        record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"), null);
                     }
                 }
                 try {
@@ -111,5 +120,6 @@ public class LinkMain {
                 }
             }
         }
+
     }
 }
