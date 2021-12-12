@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 public class TopologyInformacion {
     private static Conexion.DBConnector dataBase;
-
     private static DBTable tablaOwnedNode;
     private static DBTable tablaDiccionario;
 
@@ -106,6 +105,7 @@ public class TopologyInformacion {
             }
         }
         tablaOwned.put("uuid_node", "varchar(250) , FOREIGN KEY  (uuid_node) REFERENCES exp_topology_node(uuid)");
+        tablaOwned.put("uuid","varchar(250), foreing key (uuid) references exp_topology_link(uuid_ownedNodePoint)");
         try {
             tablaOwnedNode = Util.crearTablasGenericoMap(dataBase, "exp_topology_owned_node_edgepoint", tablaOwnedNode, tablaOwned);
             DBRecord record = tablaOwnedNode.newRecord();
@@ -134,7 +134,6 @@ public class TopologyInformacion {
         } catch (SQLException | ClassNotFoundException e) {
             return false;
         }
-
         return true;
     }
 

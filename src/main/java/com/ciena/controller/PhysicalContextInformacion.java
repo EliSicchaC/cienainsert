@@ -43,13 +43,12 @@ public class PhysicalContextInformacion {
     public void diccionarioPhysical(String lugarDelArchivo,String tapiContext,String physicalContext) throws SQLException, ClassNotFoundException {
         Map<String, String> exp_physical = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();
-        JSONObject evaluarAPhysical = null;
-        try{
+        JSONObject objectEvaluado = null;
+        try {
             JSONObject json = Util.parseJSONFile(lugarDelArchivo);
             JSONObject identifica = json.getJSONObject(tapiContext).
                     getJSONObject(physicalContext);
-            evaluarAPhysical = identifica.getJSONObject(physicalContext);
-            JSONObject objectEvaluado = identifica;
+            objectEvaluado = identifica;
             Map<String, Object> objectMap = objectEvaluado.toMap();
             for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
                 listaDeColumnas.add(entry.getKey());
@@ -59,26 +58,26 @@ public class PhysicalContextInformacion {
         }
         String[][] dicPhysical = new String[][]{
                 {
-                        "id","int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY"
+                        "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY"
                 },
                 {
-                        "atribute_name","varchar(250)"
+                        "atribute_name", "varchar(250)"
                 }
         };
         listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
-        for (String objectos : listaDeColumnas){
-            String nombreColumna = objectos.replaceAll("-","_").replaceAll(":","_");
-            if(nombreColumna.equals("uuid")){
+        for (String objectos : listaDeColumnas) {
+            String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
+            if (nombreColumna.equals("uuid")) {
                 exp_physical.put(nombreColumna, "varchar(50) primary key ");
-            }else{
-                exp_physical.put(nombreColumna,"MEDIUMTEXT");
+            } else {
+                exp_physical.put(nombreColumna, "MEDIUMTEXT");
             }
         }
         dataBase = new Conexion.DBConnector();
-        tablaDicPhysical = Util.crearTablasGenerico(dataBase,"dic_Physical",tablaDicPhysical,dicPhysical);
-        tablaExpPhysical = Util.crearTablasGenericoMap(dataBase,"exp_physical_context",tablaExpPhysical,exp_physical);
+        tablaDicPhysical = Util.crearTablasGenerico(dataBase, "dic_Physical", tablaDicPhysical, dicPhysical);
+        tablaExpPhysical = Util.crearTablasGenericoMap(dataBase, "exp_physical_context", tablaExpPhysical, exp_physical);
         DBRecord recorre = tablaDicPhysical.newRecord();
-        for(String objetos : listaDeColumnas){
+        for (String objetos : listaDeColumnas) {
             recorre = tablaDicPhysical.newRecord();
             try {
                 recorre.addField("atribute_name", objetos);
@@ -89,14 +88,13 @@ public class PhysicalContextInformacion {
             }
         }
         DBRecord record = tablaExpPhysical.newRecord();
-        JSONObject objetosEvaluadoDeJson = evaluarAPhysical;
-        Map<String, Object> objetosMap = objetosEvaluadoDeJson.toMap();
+        Map<String, Object> objetosMap = objectEvaluado.toMap();
         record = tablaExpPhysical.newRecord();
-        for (Map.Entry<String, Object> entry : objetosMap.entrySet()){
-            if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()){
-                record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), entry.getValue().toString());
+        for (Map.Entry<String, Object> entry : objetosMap.entrySet()) {
+            if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()) {
+                record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"), entry.getValue().toString());
             } else {
-                record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), null);
+                record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"), null);
             }
         }
         try {
@@ -105,6 +103,4 @@ public class PhysicalContextInformacion {
             exception.printStackTrace();
         }
     }
-
-
 }

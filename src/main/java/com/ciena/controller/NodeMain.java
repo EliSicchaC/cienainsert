@@ -35,16 +35,16 @@ public class NodeMain {
 
         Map<String, String> exp_node = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();
-        JSONArray EvaluarANode = null;
+        JSONArray evaluarANode = null;
         try{
             JSONObject json = Util.parseJSONFile(lugarDelArchivo);
             JSONObject identifica = json.getJSONObject(tapiContext).
                     getJSONObject(tapiTopology);
-            EvaluarANode = identifica.getJSONArray(topology);
+            evaluarANode = identifica.getJSONArray(topology);
             JSONArray identifcaElementos = identifica.getJSONArray(topology);
             for(Object objetos : identifcaElementos){
                 JSONObject lineaDeElementos = (JSONObject) objetos;
-                //EvaluarANode = lineaDeElementos.getJSONArray(node);
+                //evaluarANode = lineaDeElementos.getJSONArray(node);
                 for(Object objetosNode : lineaDeElementos.getJSONArray(node)){
                     JSONObject objectEvaluado = (JSONObject) objetosNode;
                     Map<String, Object> objectMap = objectEvaluado.toMap();
@@ -89,11 +89,11 @@ public class NodeMain {
             }
         }
         DBRecord record = tablaNode.newRecord();
-        for (Object objetosNode : EvaluarANode){
+        for (Object objetosNode : evaluarANode){
             JSONObject topologyUuid = (JSONObject) objetosNode;
             String columnaUuid = topologyUuid.get("uuid").toString();
-            JSONArray listTopology = topologyUuid.getJSONArray(node);
-            for (Object objectEvaluado : listTopology){
+            JSONArray listNode = topologyUuid.getJSONArray(node);
+            for (Object objectEvaluado : listNode){
                 JSONObject objectEvaluadoDeJson = (JSONObject) objectEvaluado;
                 Map<String, Object> objectMap = objectEvaluadoDeJson.toMap();
                 record = tablaNode.newRecord();
