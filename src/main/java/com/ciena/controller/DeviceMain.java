@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import util.Util;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ public class DeviceMain {
             exception.printStackTrace();
         }
     }
-    public void diccionarioDevice(String lugarDelArchivo,String tapiContext,String physicalContext,String device) throws SQLException, ClassNotFoundException {
+    public void diccionarioDevice(String lugarDelArchivo,String tapiContext,String physicalContext,String device) throws SQLException, ClassNotFoundException, IOException {
         Map<String, String> exp_device = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();
         JSONArray evaluarDevice = null;
@@ -74,7 +75,7 @@ public class DeviceMain {
         exp_device.put("uuid_physical_context","varchar(250) , FOREIGN KEY (uuid_physical_context) REFERENCES exp_physical_context(uuid)");
         dataBase = new Conexion.DBConnector();
         tablaDictDevice = Util.crearTablasGenerico(dataBase,"dic_device",tablaDictDevice,dicDevice);
-        tablaDevice = Util.crearTablasGenericoMap(dataBase,"exp_device",tablaDevice,exp_device);
+        tablaDevice = Util.crearTablasGenericoMap(dataBase,"exp_physical_device",tablaDevice,exp_device);
         DBRecord recorre = tablaDevice.newRecord();
         for(String objetos : listaDeColumnas){
             recorre = tablaDictDevice.newRecord();
@@ -99,7 +100,6 @@ public class DeviceMain {
                 }
             }
             try {
-
                 tablaDevice.insert(record);
             } catch (SQLException exception) {
                 exception.printStackTrace();
