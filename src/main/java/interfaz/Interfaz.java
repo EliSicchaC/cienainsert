@@ -1,7 +1,7 @@
 package interfaz;
 
 import com.ciena.controller.PhysicalContextMain;
-import com.ciena.controller.TopologyInformacion;
+import com.ciena.controller.OwnedNodePoint;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -76,7 +76,7 @@ public class Interfaz extends JFrame {
                     if (path != "") {
                         analizando.setVisible(true);
                         PhysicalContextMain physicalContextInformacion = new PhysicalContextMain();
-                        TopologyInformacion topologyInformacion = new TopologyInformacion();
+                        OwnedNodePoint topologyInformacion = new OwnedNodePoint();
                         /*try {
                             Boolean estadoProceso = physicalContextInformacion.analizarInformacionPhysicalContext(path);
                             Boolean proceso = topologyInformacion.analizarInformacionTopoloyContext(path);

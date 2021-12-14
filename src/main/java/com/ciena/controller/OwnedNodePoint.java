@@ -3,36 +3,32 @@ package com.ciena.controller;
 import com.ciena.controller.dao.Conexion;
 import com.ciena.controller.dao.DBRecord;
 import com.ciena.controller.dao.DBTable;
-import com.ciena.controller.entity.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import util.Util;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class TopologyInformacion {
+public class OwnedNodePoint {
     private static Conexion.DBConnector dataBase;
     private static DBTable tablaOwnedNode;
     private static DBTable tablaDiccionario;
 
     //Se crea un metodo main, para poder ejecutarlo y tambien conectarnos al json
     public static void main(final String[] args) throws IOException {
-        TopologyInformacion mainTopology = new TopologyInformacion();
+        OwnedNodePoint mainTopology = new OwnedNodePoint();
         mainTopology.analizarInformacionTopoloyContext("D:\\archivos\\objetociena.json","tapi-common:context","tapi-topology:topology-context",
                 "topology","node","owned-node-edge-point");
     }
     public Boolean analizarInformacionTopoloyContext(String rutaDeArchivo,String tapiContext,String tapiTopology,
-                                                     String topology, String node,String ownedPoint) throws IOException {
+                                                     String topology, String node,String ownedPoint){
         Boolean analizo = false;
         System.out.println("--------------------IMPRIMIR topology-------- \n");
-        TopologyInformacion mainTopology = new TopologyInformacion();
+        OwnedNodePoint mainTopology = new OwnedNodePoint();
         try {
             dataBase = new Conexion.DBConnector();
             JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
@@ -40,7 +36,7 @@ public class TopologyInformacion {
 
 
             JSONArray topologyArray = objetoTopologyContext.getJSONArray(topology);
-
+            // QUE ME TRAIGA EL PRIMER OBJETO
             JSONObject ownedNode = (JSONObject) topologyArray.get(0);
             JSONArray listaDeNode = ownedNode.getJSONArray(node);
 

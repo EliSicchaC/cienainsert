@@ -1,8 +1,6 @@
 package util;
 
-import com.ciena.controller.TopologyInformacion;
 import com.ciena.controller.dao.Conexion;
-import com.ciena.controller.dao.DBRecord;
 import com.ciena.controller.dao.DBTable;
 import com.ciena.controller.entity.Name;
 import com.ciena.controller.entity.ObjetosPrincipales;
@@ -18,10 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public  class Util {
     public static ObjetosPrincipales getObjetosPrincipales(String rutaDeArchivo) throws IOException {

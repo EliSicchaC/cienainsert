@@ -20,10 +20,10 @@ public class TopologyMain {
 
     public static void main(String[] args) {
         TopologyMain main = new TopologyMain();
-        main.llamarAlMetodo("D:\\archivos\\objetociena.json","tapi-common:context",
+        main.llamarATopology("D:\\archivos\\objetociena.json","tapi-common:context",
                 "tapi-topology:topology-context","topology");
     }
-    public void llamarAlMetodo(String rutaDelArchivo,String tapiContext,String tapiTopology,String topology){
+    public void llamarATopology(String rutaDelArchivo, String tapiContext, String tapiTopology, String topology){
         TopologyMain main = new TopologyMain();
         try{
             main.insertarTopology(rutaDelArchivo,tapiContext,tapiTopology,topology);
