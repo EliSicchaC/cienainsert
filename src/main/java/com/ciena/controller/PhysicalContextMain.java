@@ -3,7 +3,6 @@ package com.ciena.controller;
 import com.ciena.controller.dao.Conexion;
 import com.ciena.controller.dao.DBRecord;
 import com.ciena.controller.dao.DBTable;
-import com.ciena.controller.entity.*;
 import org.json.JSONObject;
 import util.Util;
 
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class PhysicalContextInformacion {
+public class PhysicalContextMain {
     private static Conexion.DBConnector dataBase;
     private static DBTable tablaDicPhysical;
     private static DBTable tablaExpPhysical;
@@ -23,15 +22,15 @@ public class PhysicalContextInformacion {
 
     //  solo esta para probar mis metodos
     public static void main(final String[] args) throws IOException {
-        PhysicalContextInformacion physical = new PhysicalContextInformacion();
+        PhysicalContextMain physical = new PhysicalContextMain();
         physical.analizarInformacionPhysicalContext("D:\\archivos\\objetociena.json","tapi-common:context",
                 "tapi-equipment:physical-context");
     }
     public Boolean analizarInformacionPhysicalContext(String rutaDelArchivo,String tapiContext,String physicalContext){
         Boolean analizo = false;
-        PhysicalContextInformacion physical = new PhysicalContextInformacion();
+        PhysicalContextMain physical = new PhysicalContextMain();
         try{
-            physical.diccionarioPhysical(rutaDelArchivo,tapiContext,physicalContext);
+            physical.insertarPhysical(rutaDelArchivo,tapiContext,physicalContext);
             analizo = true;
         } catch (Exception exception) {
             analizo = false;
@@ -40,7 +39,7 @@ public class PhysicalContextInformacion {
         return analizo;
     }
 
-    public void diccionarioPhysical(String lugarDelArchivo,String tapiContext,String physicalContext) throws SQLException, ClassNotFoundException {
+    public void insertarPhysical(String lugarDelArchivo, String tapiContext, String physicalContext) throws SQLException, ClassNotFoundException {
         Map<String, String> exp_physical = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();
         JSONObject objectEvaluado = null;

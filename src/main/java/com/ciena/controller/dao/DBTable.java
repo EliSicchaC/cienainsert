@@ -64,6 +64,14 @@ public class DBTable {
             stmt.execute(prefix.toString());
         }
     }
+    public void eliminarForeignKey()throws SQLException {
+        String prefix = " DROP TABLE " + tableName ;
+        Statement stmt = conn.createStatement();
+
+        if (recreateTables == 1) {
+            stmt.execute(prefix.toString());
+        }
+    }
     public DBRecord newRecord() {
         return new DBRecord(tableName);
     }

@@ -28,29 +28,30 @@ public class AccessPortMain {
                                  String physicalContext,String device, String accessport){
         AccessPortMain main = new AccessPortMain();
         try {
-            main.diccionarioAccessPort(rutaDelArchivo,tapiContext,physicalContext,device,accessport);
+            main.insertarAccessPort(rutaDelArchivo,tapiContext,physicalContext,device,accessport);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
-    public void diccionarioAccessPort(String lugarDelArchivo,String tapiContext,
-                                      String physicalContext,String device,String accessport) throws SQLException, ClassNotFoundException {
+    public void insertarAccessPort(String lugarDelArchivo, String tapiContext,
+                                   String physicalContext, String device, String accessport) throws SQLException, ClassNotFoundException {
         Map<String, String> exp_accessport = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();
         JSONArray evaluarAccessPort = null;
         try{
             JSONObject json = Util.parseJSONFile(lugarDelArchivo);
-            JSONObject identifica = json.getJSONObject(tapiContext).
-                    getJSONObject(physicalContext);
+            JSONObject identifica = json.getJSONObject(tapiContext).getJSONObject(physicalContext);
             evaluarAccessPort = identifica.getJSONArray(device);
             JSONArray identificaElementos = identifica.getJSONArray(device);
             for(Object objetos : identificaElementos){
                 JSONObject lineaDeElementos = (JSONObject) objetos;
-                for(Object objetosNode : lineaDeElementos.getJSONArray(accessport)){
-                    JSONObject objectEvaluado = (JSONObject) objetosNode;
-                    Map<String, Object> objectMap = objectEvaluado.toMap();
-                    for (Map.Entry<String, Object> entry : objectMap.entrySet()){
-                        listaDeColumnas.add(entry.getKey());
+                if(lineaDeElementos.has(accessport)){
+                    for(Object objetosNode : lineaDeElementos.getJSONArray(accessport)){
+                        JSONObject objectEvaluado = (JSONObject) objetosNode;
+                        Map<String, Object> objectMap = objectEvaluado.toMap();
+                        for (Map.Entry<String, Object> entry : objectMap.entrySet()){
+                            listaDeColumnas.add(entry.getKey());
+                        }
                     }
                 }
             }
@@ -74,7 +75,7 @@ public class AccessPortMain {
                 exp_accessport.put(nombreColumna, "MEDIUMTEXT");
             }
         }
-        exp_accessport.put("uuid_device","varchar(250) , FOREIGN KEY (uuid_device) REFERENCES exp_physical_device(uuid)");
+        exp_accessport.put("uuid_device","varchar(250) , foreign key (uuid_device) references exp_physical_device(uuid)");
         dataBase = new Conexion.DBConnector();
         tablaDicAccessPort = Util.crearTablasGenerico(dataBase,"dic_access_port",tablaDicAccessPort,dicAccessPort);
         tablaAccessPort = Util.crearTablasGenericoMap(dataBase,"exp_physical_access_port",tablaAccessPort,exp_accessport);
@@ -93,26 +94,35 @@ public class AccessPortMain {
         for (Object objetosNode : evaluarAccessPort){
             JSONObject deviceUuid = (JSONObject) objetosNode;
             String columnaUuid = deviceUuid.get("uuid").toString();
-            JSONArray listAccesPort = deviceUuid.getJSONArray(accessport);
-            for (Object objectEvaluado : listAccesPort){
-                JSONObject objectEvaluadoDeJson = (JSONObject) objectEvaluado;
-                Map<String, Object> objectMap = objectEvaluadoDeJson.toMap();
-                record = tablaAccessPort.newRecord();
-                for (Map.Entry<String, Object> entry : objectMap.entrySet()){
-                    if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()){
-                        record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), entry.getValue().toString());
-                    } else {
-                        record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), null);
-                    }
-                }
-                try {
-                    record.addField("uuid_device", columnaUuid);
-                    tablaAccessPort.insert(record);
-
-                } catch (SQLException exception) {
-                    exception.printStackTrace();
+            //HAS ES TENER, SI TIENE QUE ME LO EJECUTE SI NO ELSE
+            //NUNCA VALIDAR ANTES
+            if(deviceUuid.has(accessport)){
+                JSONArray listAccesPort = deviceUuid.getJSONArray(accessport);
+                for (Object objectEvaluado : listAccesPort){
+                    JSONObject columnasDeObjeto = (JSONObject) objectEvaluado;
+                    record = tablaAccessPort.newRecord();
+                    insertarInformacion(record, columnasDeObjeto, listaDeColumnas, columnaUuid);
                 }
             }
+        }
+    }
+    private void insertarInformacion(DBRecord record,JSONObject objetos,List<String>listaDeColumnas,
+                                     String columnaUuid){
+        Map<String, Object> objectMap = objetos.toMap();
+        record = tablaAccessPort.newRecord();
+        for (Map.Entry<String, Object> entry : objectMap.entrySet()){
+            if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()){
+                record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), entry.getValue().toString());
+            } else {
+                record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), null);
+            }
+        }
+        try {
+            record.addField("uuid_device", columnaUuid);
+            tablaAccessPort.insert(record);
+
+        } catch (SQLException exception) {
+            exception.printStackTrace();
         }
     }
 }

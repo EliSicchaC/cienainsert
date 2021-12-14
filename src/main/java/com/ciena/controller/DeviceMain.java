@@ -20,7 +20,6 @@ public class DeviceMain {
     private static DBTable tablaDictDevice;
     private static DBTable tablaDevice;
 
-
     public static void main(String[] args) {
         DeviceMain device = new DeviceMain();
         device.llamarADevice("D:\\archivos\\objetociena.json","tapi-common:context",
@@ -29,19 +28,21 @@ public class DeviceMain {
     public void llamarADevice(String rutaDelArchivo,String tapiContext,String physicalContext,String device){
         DeviceMain deviceContext = new DeviceMain();
         try{
-            deviceContext.diccionarioDevice(rutaDelArchivo,tapiContext,physicalContext,device);
+            deviceContext.insertarDevice(rutaDelArchivo,tapiContext,physicalContext,device);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
-    public void diccionarioDevice(String lugarDelArchivo,String tapiContext,String physicalContext,String device) throws SQLException, ClassNotFoundException, IOException {
+    public void insertarDevice(String lugarDelArchivo, String tapiContext, String physicalContext, String device) throws SQLException, ClassNotFoundException, IOException {
         Map<String, String> exp_device = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();
         JSONArray evaluarDevice = null;
+        String uuidPhysical = "";
         try{
             JSONObject json = Util.parseJSONFile(lugarDelArchivo);
             JSONObject identifica = json.getJSONObject(tapiContext).
                     getJSONObject(physicalContext);
+            uuidPhysical = identifica.getString("uuid");
             evaluarDevice = identifica.getJSONArray(device);
             JSONArray identificaElementos = identifica.getJSONArray(device);
             for(Object objetos : identificaElementos){
@@ -100,6 +101,7 @@ public class DeviceMain {
                 }
             }
             try {
+                record.addField("uuid_physical_context",uuidPhysical);
                 tablaDevice.insert(record);
             } catch (SQLException exception) {
                 exception.printStackTrace();

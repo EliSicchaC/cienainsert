@@ -26,12 +26,12 @@ public class TopologyMain {
     public void llamarAlMetodo(String rutaDelArchivo,String tapiContext,String tapiTopology,String topology){
         TopologyMain main = new TopologyMain();
         try{
-            main.diccionarioTopology(rutaDelArchivo,tapiContext,tapiTopology,topology);
+            main.insertarTopology(rutaDelArchivo,tapiContext,tapiTopology,topology);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
-    public void diccionarioTopology(String lugarDelArchivo,String tapiContext,String tapiTopology,String topology) throws SQLException, ClassNotFoundException {
+    public void insertarTopology(String lugarDelArchivo, String tapiContext, String tapiTopology, String topology) throws SQLException, ClassNotFoundException {
         Map<String, String> exp_Topology = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();
         JSONArray evaluarATopology = null;

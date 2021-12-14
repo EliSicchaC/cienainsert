@@ -99,13 +99,12 @@ public class TopologyInformacion {
             //INSERTANDO DATA
             String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
             if(nombreColumna.equals("uuid")){
-                tablaOwned.put(nombreColumna, "varchar(50) primary key ");
+                tablaOwned.put(nombreColumna, "varchar(50) primary key");
             }else{
                 tablaOwned.put(nombreColumna,"MEDIUMTEXT");
             }
         }
         tablaOwned.put("uuid_node", "varchar(250) , FOREIGN KEY  (uuid_node) REFERENCES exp_topology_node(uuid)");
-        tablaOwned.put("uuid","varchar(250), foreing key (uuid) references exp_topology_link(uuid_ownedNodePoint)");
         try {
             tablaOwnedNode = Util.crearTablasGenericoMap(dataBase, "exp_topology_owned_node_edgepoint", tablaOwnedNode, tablaOwned);
             DBRecord record = tablaOwnedNode.newRecord();
@@ -132,6 +131,7 @@ public class TopologyInformacion {
                 }
             }
         } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
             return false;
         }
         return true;

@@ -30,15 +30,15 @@ public class LinkMain {
 			String link,String nodeEdgePoint) throws IOException {
 		LinkMain linkMain = new LinkMain();
 		try {
-			linkMain.diccionarioLink(rutaDeArchivo, tapiContext, tapiTopology, topology, link, nodeEdgePoint);
+			linkMain.insertarLink(rutaDeArchivo, tapiContext, tapiTopology, topology, link, nodeEdgePoint);
 
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
 	}
 
-	public void diccionarioLink(String lugarDelArchivo, String tapiContext, String tapiTopology, String topology,
-			String link,String nodeEdgePoint) throws SQLException, ClassNotFoundException {
+	public void insertarLink(String lugarDelArchivo, String tapiContext, String tapiTopology, String topology,
+							 String link, String nodeEdgePoint) throws SQLException, ClassNotFoundException {
 
 		Map<String, String> exp_Link = new HashMap<>();
 		List<String> listaDeColumnas = new ArrayList<>();
@@ -77,8 +77,8 @@ public class LinkMain {
 			}
 		}
 		// FOREIGN KEY (NOMBRE) REFERENCES NOMBREDELATABLA(QUEQUIEREDELATABLA)
-		exp_Link.put("uuid_topology", "varchar(250) , FOREIGN KEY  (uuid_topology) REFERENCES exp_topology(uuid) ");
-		exp_Link.put("uuid_ownedNodePoint", "varchar(250)");
+		exp_Link.put("uuid_topology", "varchar(250) , FOREIGN KEY  (uuid_topology) REFERENCES exp_topology(uuid)");
+		exp_Link.put("uuid_ownedNodePoint", "varchar(250) , foreign key (uuid_ownedNodePoint) references exp_topology_owned_node_edgepoint(uuid)");
 		dataBase = new Conexion.DBConnector();
 		// APARTIR DE AQUI SE CREA LA TABLA, SI NO ENTONCES NO FUNCIONARA EL FOREIGN KEY
 		tablaDicLink = Util.crearTablasGenerico(dataBase, "dic_topology_link", tablaDicLink, dicLink);

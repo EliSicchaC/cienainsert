@@ -26,12 +26,12 @@ public class NodeMain {
     public void llamarAlMetodo(String rutaDelArchivo,String tapiContext,String tapiTopology,String topology,String node){
         NodeMain main = new NodeMain();
         try{
-            main.diccionarioNode(rutaDelArchivo,tapiContext,tapiTopology,topology,node);
+            main.insertarNode(rutaDelArchivo,tapiContext,tapiTopology,topology,node);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
-    public void diccionarioNode(String lugarDelArchivo,String tapiContext,String tapiTopology,String topology,String node) throws SQLException, ClassNotFoundException {
+    public void insertarNode(String lugarDelArchivo, String tapiContext, String tapiTopology, String topology, String node) throws SQLException, ClassNotFoundException {
 
         Map<String, String> exp_node = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();

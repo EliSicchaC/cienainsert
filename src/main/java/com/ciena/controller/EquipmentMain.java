@@ -30,13 +30,13 @@ public class EquipmentMain {
                                  String physicalContext,String device, String equipment){
         EquipmentMain equipmentMain = new EquipmentMain();
         try{
-            equipmentMain.diccionarioEquipment(rutaDelArchivo,tapiContext,physicalContext,device,equipment);
+            equipmentMain.insertarEquipment(rutaDelArchivo,tapiContext,physicalContext,device,equipment);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
-    public void diccionarioEquipment(String lugarDelArchivo,String tapiContext,
-                                     String physicalContext,String device,String equipment) throws SQLException, ClassNotFoundException {
+    public void insertarEquipment(String lugarDelArchivo, String tapiContext,
+                                  String physicalContext, String device, String equipment) throws SQLException, ClassNotFoundException {
         Map<String, String> exp_equipment = new HashMap<>();
         List<String> listaDeColumnas = new ArrayList<>();
         JSONArray evaluarEquipment = null;
