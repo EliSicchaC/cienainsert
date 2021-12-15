@@ -6,7 +6,7 @@ public class Conexion {
     public static class DBConnector {
         final static String dbAddress = "190.232.112.5";  //todo: move them to properties
         //final static String dbName = "db_read_corba";
-        final static String dbName = "db_telecom_eli";
+        final static String dbName = "onf-tapi_model";
         final static String dbUser = "esiccha";
         final static String dbPassword = "siccha";
         Connection conn;

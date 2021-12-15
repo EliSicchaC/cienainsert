@@ -72,6 +72,16 @@ public class Util {
 		String contenido = new String(Files.readAllBytes(Paths.get(filename)));
 		return new JSONObject(contenido);
 	}
+	public static JSONObject retonarListaPropiedadesAsociadasAPadre(JSONObject archivoJson, String nodoPadre){
+		JSONObject propiedades = null;
+		try {
+			propiedades = archivoJson.getJSONObject(nodoPadre);
+
+		} catch (Exception exception) {
+			System.out.println("error:: " + exception.getMessage());
+		}
+		return propiedades;
+	}
 
 	public static JSONObject retonarListaPropiedadesAsociadasNodoHijo(JSONObject archivoJson, String nodoPadre,
 			String nodoHijoPrimerSegmento) {
@@ -99,7 +109,6 @@ public class Util {
 			}
 		}
 		return listaDeColumnas;
-
 	}
 
 	public static List<String> listaDeColumnasPadreObject(JSONObject nodoConLasColumnas, String nodo) {
@@ -112,9 +121,16 @@ public class Util {
 				listaDeColumnas.add(entry.getKey());
 			}
 		}
-
 		return listaDeColumnas;
-
 	}
-
+	public static List<String> padreObject(JSONObject nodoConLasColumnas, String nodo) {
+		List<String> listaDeColumnas = new ArrayList<>();
+		JSONObject listaDeEdgePoint = nodoConLasColumnas.getJSONObject(nodo);
+		JSONObject objetoEvaluadoJson = listaDeEdgePoint;
+		Map<String, Object> objectMap = objetoEvaluadoJson.toMap();
+		for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+			listaDeColumnas.add(entry.getKey());
+		}
+		return listaDeColumnas;
+	}
 }

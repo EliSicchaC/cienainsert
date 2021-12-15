@@ -21,16 +21,16 @@ public class OwnedNodePoint {
 	// Se crea un metodo main, para poder ejecutarlo y tambien conectarnos al json
 	public static void main(final String[] args) throws IOException {
 		OwnedNodePoint mainTopology = new OwnedNodePoint();
-		mainTopology.analizarInformacionTopoloyContext("D:\\archivos\\objetociena.json", "tapi-common:context",
+		mainTopology.analizarInformacionOwned("D:\\archivos\\objetociena.json", "tapi-common:context",
 				"tapi-topology:topology-context", "topology", "node", "owned-node-edge-point");
 	}
 
-	public Boolean analizarInformacionTopoloyContext(String rutaDeArchivo, String tapiContext, String tapiTopology,
-			String topology, String node, String ownedPoint) {
+	public Boolean analizarInformacionOwned(String rutaDeArchivo, String tapiContext, String tapiTopology,
+                                            String topology, String node, String ownedPoint) {
 		boolean analizo = false;
 		boolean insertoDiccionarioOwned = false;
 		boolean insertoMatrizOwned = false;
-		System.out.println("-------------Procesando información de: " + ownedPoint + "------- \n");
+		System.out.println("-------------Procesando informacion de: " + ownedPoint + "------- \n");
 		try {
 			dataBase = new Conexion.DBConnector();
 			JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
@@ -55,14 +55,13 @@ public class OwnedNodePoint {
 	}
 
 	private Boolean insertarDiccionarioOwned(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
-		String[][] ownedpoint = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
-				{ "atribute_name", "varchar(250)" }, { "sample_reference_object_uuid", "varchar(250)" },
-				{ "sample_value", "MEDIUMTEXT" }, { "sample_reference_onep_layer_protocol_qualifier", "MEDIUMTEXT" } };
+		String[][] dicOwnedpoint = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
+				{ "atribute_name", "varchar(250)" }};
 		listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
 		try {
 			String nombreTabla = "dic_topology_onep";
 			System.out.println("	-------------Creando tabla: " + nombreTabla);
-			tablaDiccionario = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDiccionario, ownedpoint);
+			tablaDiccionario = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDiccionario, dicOwnedpoint);
 			DBRecord recorre = tablaDiccionario.newRecord();
 			for (String objetos : listaDeColumnas) {
 				recorre = tablaDiccionario.newRecord();
@@ -74,7 +73,6 @@ public class OwnedNodePoint {
 			return false;
 		}
 		return true;
-
 	}
 
 	private Boolean insertarMatrizOwnedNode(List<String> listaDeColumnas, Conexion.DBConnector dataBase,
@@ -123,5 +121,4 @@ public class OwnedNodePoint {
 		}
 		return true;
 	}
-
 }

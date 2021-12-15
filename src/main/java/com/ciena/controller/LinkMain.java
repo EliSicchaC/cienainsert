@@ -22,107 +22,112 @@ public class LinkMain {
 
 	public static void main(final String[] args) throws IOException {
 		LinkMain linkMain = new LinkMain();
-		linkMain.llamarAlMetodo("D:\\archivos\\objetociena.json", "tapi-common:context",
+		linkMain.analizarInformacionLink("D:\\archivos\\objetociena.json", "tapi-common:context",
 				"tapi-topology:topology-context", "topology", "link","node-edge-point");
 	}
-
-	public void llamarAlMetodo(String rutaDeArchivo, String tapiContext, String tapiTopology, String topology,
-			String link,String nodeEdgePoint) throws IOException {
-		LinkMain linkMain = new LinkMain();
+	public Boolean analizarInformacionLink(String rutaDeArchivo, String tapiContext, String tapiTopology,
+										   String topology,String link,String nodeEdgePoint) {
+		boolean analizo = false;
+		boolean insertoDiccionarioLink = false;
+		boolean insertoMatrizLink = false;
+		System.out.println("-------------Procesando informacion de: " + link + "------- \n");
 		try {
-			linkMain.insertarLink(rutaDeArchivo, tapiContext, tapiTopology, topology, link, nodeEdgePoint);
-
-		} catch (Exception exception) {
-			exception.printStackTrace();
+			dataBase = new Conexion.DBConnector();
+			//AQUI ME ESTOY POSICIONANDO EN TAPITOPOLOGY
+			JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
+			JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
+					tapiContext, tapiTopology);
+			//QUIERO LO QUE VIEN EN TOPOLOGY POR ESO TOPOLOGY ES EL PADRE
+			JSONArray topologyArray = objetoTopologyContext.getJSONArray(topology);
+			JSONObject linkContext = (JSONObject) topologyArray.get(0);
+			JSONArray listaDeLink = linkContext.getJSONArray(link);
+			//PADRE TOPOLOGY Y HIJO LINK
+			List<String> listaColumnas = Util.listaDeColumnasPadreArray(topologyArray, link);
+			insertoDiccionarioLink = insertarDiccionarioLink(listaColumnas, dataBase);
+			insertoMatrizLink = insertarMatrizLink(listaColumnas, dataBase, topologyArray,link,nodeEdgePoint);
+			System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioLink  + "/ "+ insertoMatrizLink);
+			analizo = insertoDiccionarioLink && insertoMatrizLink ? true : false;
+		} catch (Exception e) {
+			analizo = false;
+			System.out.println("-------------Procesando con errores: " + e.getMessage());
+			e.printStackTrace();
 		}
+		return analizo;
 	}
 
-	public void insertarLink(String lugarDelArchivo, String tapiContext, String tapiTopology, String topology,
-							 String link, String nodeEdgePoint) throws SQLException, ClassNotFoundException {
-
+	private boolean insertarMatrizLink(List<String> listaDeColumnas, Conexion.DBConnector dataBase,
+									   JSONArray evaluarALink, String link,String nodeEdgePoint) {
 		Map<String, String> exp_Link = new HashMap<>();
-		List<String> listaDeColumnas = new ArrayList<>();
-		JSONArray evaluarALink = null;
-		try {
-			JSONObject json = Util.parseJSONFile(lugarDelArchivo);
-			JSONObject identifica = json.getJSONObject(tapiContext).getJSONObject(tapiTopology);
-			evaluarALink = identifica.getJSONArray(topology);
-			JSONArray identificaElementos = identifica.getJSONArray(topology);
-			for (Object objetos : identificaElementos) {
-				JSONObject lineaDeElementos = (JSONObject) objetos;
-				for (Object objetosLink : lineaDeElementos.getJSONArray(link)) {
-					JSONObject objectEvaluado = (JSONObject) objetosLink;
-					Map<String, Object> objectMap = objectEvaluado.toMap();
-					for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-						listaDeColumnas.add(entry.getKey());
-					}
-				}
-			}
-		} catch (Exception exception) {
-			System.out.println("error:: " + exception.getMessage());
-		}
-		String[][] dicLink = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
-				{ "atribute_name", "varchar(250)" } };
-		listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
 		for (String objectos : listaDeColumnas) {
+			// INSERTANDO DATA
 			String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
-			/*
-			 * SOLO SIRVE PARA PRIMERY KEY PORQUE LO QUE QUEREMOS ES VALIDAR SI AQUELLA
-			 * COLUMNA EXISTE EN LA TABLA
-			 */
 			if (nombreColumna.equals("uuid")) {
 				exp_Link.put(nombreColumna, "varchar(50)");
 			} else {
 				exp_Link.put(nombreColumna, "MEDIUMTEXT");
 			}
 		}
-		// FOREIGN KEY (NOMBRE) REFERENCES NOMBREDELATABLA(QUEQUIEREDELATABLA)
 		exp_Link.put("uuid_topology", "varchar(250) , FOREIGN KEY  (uuid_topology) REFERENCES exp_topology(uuid)");
 		exp_Link.put("uuid_ownedNodePoint", "varchar(250) , foreign key (uuid_ownedNodePoint) references exp_topology_owned_node_edgepoint(uuid)");
-		dataBase = new Conexion.DBConnector();
-		// APARTIR DE AQUI SE CREA LA TABLA, SI NO ENTONCES NO FUNCIONARA EL FOREIGN KEY
-		tablaDicLink = Util.crearTablasGenerico(dataBase, "dic_topology_link", tablaDicLink, dicLink);
-		tablaLink = Util.crearTablasGenericoMap(dataBase, "exp_topology_link", tablaLink, exp_Link);
-		DBRecord recorre = tablaDicLink.newRecord();
-		for (String objetos : listaDeColumnas) {
-			recorre = tablaDicLink.newRecord();
-			try {
-				recorre.addField("atribute_name", objetos);
-				tablaDicLink.insert(recorre);
+		try{
+			tablaLink = Util.crearTablasGenericoMap(dataBase, "exp_topology_link", tablaLink, exp_Link);
+			DBRecord record = tablaLink.newRecord();
 
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		DBRecord record = tablaLink.newRecord();
-		for (Object objetosLink : evaluarALink) {
-			JSONObject topologyLink = (JSONObject) objetosLink;
-			String columnaUuid = topologyLink.get("uuid").toString();
-			JSONArray listLink = topologyLink.getJSONArray(link);
-			for (Object objectEvaluado : listLink) {
-				JSONObject objetos = (JSONObject) objectEvaluado;
-				//VALIDO SI TODOS TIENEN EL OBJETO NODEEDGEPOINT, Y SI LO TIENE QUE ME LO TRAIGA
-				if (objetos.has(nodeEdgePoint)) {
-					// ME POSICIONO EN EL NODE EDGE POINT
-					JSONArray node = objetos.getJSONArray(nodeEdgePoint);
-					// RECORRO TODO LO QUE TIENE NODE EDGE POINT
-					for (Object objectNode : node) {
+			for (Object objetosLink : evaluarALink) {
+				JSONObject topologyLink = (JSONObject) objetosLink;
+				String columnaUuid = topologyLink.get("uuid").toString();
+				JSONArray listLink = topologyLink.getJSONArray(link);
+				for (Object objectEvaluado : listLink) {
+					JSONObject objetos = (JSONObject) objectEvaluado;
+					//VALIDO SI TODOS TIENEN EL OBJETO NODEEDGEPOINT, Y SI LO TIENE QUE ME LO TRAIGA
+					if (objetos.has(nodeEdgePoint)) {
+						// ME POSICIONO EN EL NODE EDGE POINT
+						JSONArray node = objetos.getJSONArray(nodeEdgePoint);
+						// RECORRO TODO LO QUE TIENE NODE EDGE POINT
+						for (Object objectNode : node) {
+							record = tablaLink.newRecord();
+							JSONObject objetosEvaluadoDeJson = (JSONObject) objectNode;
+							record.addField("uuid_ownedNodePoint",
+									objetosEvaluadoDeJson.get("node-edge-point-uuid").toString());
+							//QUE ME TRAIGA TODAS LAS PARTES DE LINK
+							insertarInformacion(record, objetos, listaDeColumnas, columnaUuid);
+						}
+						//SI NO LO TIENE ENTONCES QUE ME TRAIGA TODO LO QUE TIENE LINK
+					}else {
 						record = tablaLink.newRecord();
-						JSONObject objetosEvaluadoDeJson = (JSONObject) objectNode;
-						record.addField("uuid_ownedNodePoint",
-								objetosEvaluadoDeJson.get("node-edge-point-uuid").toString());
-						//QUE ME TRAIGA TODAS LAS PARTES DE LINK
 						insertarInformacion(record, objetos, listaDeColumnas, columnaUuid);
 					}
-					//SI NO LO TIENE ENTONCES QUE ME TRAIGA TODO LO QUE TIENE LINK
-				}else {
-					record = tablaLink.newRecord();
-					insertarInformacion(record, objetos, listaDeColumnas, columnaUuid);
 				}
-
 			}
+		}catch (SQLException | ClassNotFoundException e) {
+			e.printStackTrace();
+			return false;
 		}
+		return true;
 	}
+
+	private boolean insertarDiccionarioLink(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
+		String[][] dicTopology = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
+				{ "atribute_name", "varchar(250)" } };
+		listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
+		try{
+			String nombreTabla = "dic_topology_link";
+			System.out.println("	-------------Creando tabla: " + nombreTabla);
+			tablaDicLink = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicLink, dicTopology);
+			DBRecord recorre = tablaDicLink.newRecord();
+			for (String objetos : listaDeColumnas) {
+				recorre = tablaDicLink.newRecord();
+				recorre.addField("atribute_name", objetos);
+				tablaDicLink.insert(recorre);
+			}
+		} catch (Exception e) {
+			System.out.println("-------------Procesando con errores: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return true;
+	}
+
+
 	//REFACTORICE LO QUE TRAE TODO LINK PARA USARLO ARRIBA
 	private void insertarInformacion(DBRecord record, JSONObject objetos, List<String> listaDeColumnas,
 			String columnaUuid) {

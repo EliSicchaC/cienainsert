@@ -20,98 +20,103 @@ public class NodeMain {
 
     public static void main(String[] args) {
         NodeMain main = new NodeMain();
-        main.llamarAlMetodo("D:\\archivos\\objetociena.json","tapi-common:context",
+        main.analizarInformacionNode("D:\\archivos\\objetociena.json","tapi-common:context",
                 "tapi-topology:topology-context","topology","node");
     }
-    public void llamarAlMetodo(String rutaDelArchivo,String tapiContext,String tapiTopology,String topology,String node){
-        NodeMain main = new NodeMain();
-        try{
-            main.insertarNode(rutaDelArchivo,tapiContext,tapiTopology,topology,node);
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-    }
-    public void insertarNode(String lugarDelArchivo, String tapiContext, String tapiTopology, String topology, String node) throws SQLException, ClassNotFoundException {
+    public Boolean analizarInformacionNode(String rutaDeArchivo, String tapiContext, String tapiTopology,
+                                           String topology,String node) {
+        boolean analizo = false;
+        boolean insertoDiccionarioNode = false;
+        boolean insertoMatrizNode = false;
+        System.out.println("-------------Procesando informacion de: " + node + "------- \n");
+        try {
+            dataBase = new Conexion.DBConnector();
+            JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
+            JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
+                    tapiContext, tapiTopology);
 
-        Map<String, String> exp_node = new HashMap<>();
-        List<String> listaDeColumnas = new ArrayList<>();
-        JSONArray evaluarANode = null;
+            JSONArray topologyArray = objetoTopologyContext.getJSONArray(topology);
+            JSONObject nodeContext = (JSONObject) topologyArray.get(0);
+            JSONArray listaDeNode= nodeContext.getJSONArray(node);
+
+            List<String> listaColumnas = Util.listaDeColumnasPadreArray(topologyArray, node);
+            insertoDiccionarioNode = insertarDiccionarioNode(listaColumnas, dataBase);
+            insertoMatrizNode = insertarMatrizNode(listaColumnas, dataBase, topologyArray,node);
+            System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioNode  + "/ "+ insertoMatrizNode);
+            analizo = insertoDiccionarioNode && insertoMatrizNode ? true : false;
+        } catch (Exception e) {
+            analizo = false;
+            System.out.println("-------------Procesando con errores: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return analizo;
+    }
+
+    private boolean insertarMatrizNode(List<String> listaDeColumnas, Conexion.DBConnector dataBase, JSONArray evaluarANode, String node) {
+        Map<String, String> exp_Node = new HashMap<>();
+        for (String objectos : listaDeColumnas) {
+            // INSERTANDO DATA
+            String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
+            if (nombreColumna.equals("uuid")) {
+                exp_Node.put(nombreColumna, "varchar(50) primary key");
+            } else {
+                exp_Node.put(nombreColumna, "MEDIUMTEXT");
+            }
+        }
+        exp_Node.put("uuid_topology", "varchar(250) , FOREIGN KEY  (uuid_topology) REFERENCES exp_topology(uuid)");
         try{
-            JSONObject json = Util.parseJSONFile(lugarDelArchivo);
-            JSONObject identifica = json.getJSONObject(tapiContext).
-                    getJSONObject(tapiTopology);
-            evaluarANode = identifica.getJSONArray(topology);
-            JSONArray identifcaElementos = identifica.getJSONArray(topology);
-            for(Object objetos : identifcaElementos){
-                JSONObject lineaDeElementos = (JSONObject) objetos;
-                //evaluarANode = lineaDeElementos.getJSONArray(node);
-                for(Object objetosNode : lineaDeElementos.getJSONArray(node)){
-                    JSONObject objectEvaluado = (JSONObject) objetosNode;
-                    Map<String, Object> objectMap = objectEvaluado.toMap();
+            tablaNode = Util.crearTablasGenericoMap(dataBase, "exp_topology_node", tablaNode, exp_Node);
+            DBRecord record = tablaNode.newRecord();
+            for (Object objetosNode : evaluarANode){
+                JSONObject topologyUuid = (JSONObject) objetosNode;
+                String columnaUuid = topologyUuid.get("uuid").toString();
+                JSONArray listNode = topologyUuid.getJSONArray(node);
+                for (Object objectEvaluado : listNode){
+                    JSONObject objectEvaluadoDeJson = (JSONObject) objectEvaluado;
+                    Map<String, Object> objectMap = objectEvaluadoDeJson.toMap();
+                    record = tablaNode.newRecord();
                     for (Map.Entry<String, Object> entry : objectMap.entrySet()){
-                        listaDeColumnas.add(entry.getKey());
+                        if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()){
+                            record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), entry.getValue().toString());
+                        } else {
+                            record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), null);
+                        }
+                    }
+                    try {
+                        record.addField("uuid_topology", columnaUuid);
+                        tablaNode.insert(record);
+
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
                     }
                 }
             }
-        } catch (Exception exception) {
-            System.out.println("error:: " + exception.getMessage());
+        }catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return false;
         }
-        String[][] dicNode = new String[][]{
-                {
-                        "id","int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY"
-                },
-                {
-                        "atribute_name","varchar(250)"
-                }
-        };
+        return true;
+    }
+
+    private boolean insertarDiccionarioNode(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
+        String[][] dicTopology = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
+                { "atribute_name", "varchar(250)" } };
         listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
-        for (String objectos : listaDeColumnas){
-            String nombreColumna = objectos.replaceAll("-","_").replaceAll(":","_");
-            if(nombreColumna.equals("uuid")){
-                exp_node.put(nombreColumna, "varchar(50) primary key ");
-            }else{
-                exp_node.put(nombreColumna,"MEDIUMTEXT");
-            }
-        }
-        exp_node.put("uuid_topology","varchar(250) , FOREIGN KEY  (uuid_topology) REFERENCES exp_topology(uuid)");
-        dataBase = new Conexion.DBConnector();
-        tablaDicNode = Util.crearTablasGenerico(dataBase,"dic_topology_node",tablaDicNode,dicNode);
-        tablaNode = Util.crearTablasGenericoMap(dataBase,"exp_topology_node",tablaNode,exp_node);
-        DBRecord recorre = tablaNode.newRecord();
-        for(String objetos : listaDeColumnas){
-            recorre = tablaDicNode.newRecord();
-            try {
+        try{
+            String nombreTabla = "dic_topology_node";
+            System.out.println("	-------------Creando tabla: " + nombreTabla);
+            tablaDicNode = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicNode, dicTopology);
+            DBRecord recorre = tablaDicNode.newRecord();
+            for (String objetos : listaDeColumnas) {
+                recorre = tablaDicNode.newRecord();
                 recorre.addField("atribute_name", objetos);
                 tablaDicNode.insert(recorre);
-
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            System.out.println("-------------Procesando con errores: " + e.getMessage());
+            e.printStackTrace();
         }
-        DBRecord record = tablaNode.newRecord();
-        for (Object objetosNode : evaluarANode){
-            JSONObject topologyUuid = (JSONObject) objetosNode;
-            String columnaUuid = topologyUuid.get("uuid").toString();
-            JSONArray listNode = topologyUuid.getJSONArray(node);
-            for (Object objectEvaluado : listNode){
-                JSONObject objectEvaluadoDeJson = (JSONObject) objectEvaluado;
-                Map<String, Object> objectMap = objectEvaluadoDeJson.toMap();
-                record = tablaNode.newRecord();
-                for (Map.Entry<String, Object> entry : objectMap.entrySet()){
-                    if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()){
-                        record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), entry.getValue().toString());
-                    } else {
-                        record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), null);
-                    }
-                }
-                try {
-                    record.addField("uuid_topology", columnaUuid);
-                    tablaNode.insert(record);
-
-                } catch (SQLException exception) {
-                    exception.printStackTrace();
-                }
-            }
-        }
+        return true;
     }
+
 }
