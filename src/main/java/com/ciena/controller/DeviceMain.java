@@ -7,9 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import util.Util;
 
-import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,95 +15,104 @@ import java.util.stream.Collectors;
 
 public class DeviceMain {
     private Conexion.DBConnector dataBase;
-    private static DBTable tablaDictDevice;
+    private static DBTable tablaDicDevice;
     private static DBTable tablaDevice;
 
     public static void main(String[] args) {
         DeviceMain device = new DeviceMain();
-        device.llamarADevice("D:\\archivos\\objetociena.json","tapi-common:context",
+        device.analizarInformacionDevice("D:\\archivos\\objetociena.json","tapi-common:context",
                 "tapi-equipment:physical-context","device");
     }
-    public void llamarADevice(String rutaDelArchivo,String tapiContext,String physicalContext,String device){
-        DeviceMain deviceContext = new DeviceMain();
-        try{
-            deviceContext.insertarDevice(rutaDelArchivo,tapiContext,physicalContext,device);
-        } catch (Exception exception) {
-            exception.printStackTrace();
+    public Boolean analizarInformacionDevice(String rutaDeArchivo, String tapiContext, String tapiPhysical,
+                                              String device) {
+        boolean analizo = false;
+        boolean insertoDiccionarioDevice = false;
+        boolean insertoMatrizDevice = false;
+        System.out.println("-------------Procesando informacion de: " + device + "------- \n");
+        try {
+            dataBase = new Conexion.DBConnector();
+
+            JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
+            JSONObject objetoTapiPhysical = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
+                    tapiContext, tapiPhysical);
+
+            List<String> listaColumnas = Util.listaDeColumnasPadreObject(objetoTapiPhysical, device);
+            insertoDiccionarioDevice = insertarDiccionarioDevice(listaColumnas, dataBase);
+            insertoMatrizDevice = insertarMatrizDevice(listaColumnas, dataBase, objetoTapiPhysical, device);
+            System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioDevice + "/ "
+                    + insertoMatrizDevice);
+            analizo = insertoDiccionarioDevice && insertoMatrizDevice ? true : false;
+        } catch (Exception e) {
+            analizo = false;
+            System.out.println("-------------Procesando con errores: " + e.getMessage());
+            e.printStackTrace();
         }
+
+        return analizo;
     }
-    public void insertarDevice(String lugarDelArchivo, String tapiContext, String physicalContext, String device) throws SQLException, ClassNotFoundException, IOException {
-        Map<String, String> exp_device = new HashMap<>();
-        List<String> listaDeColumnas = new ArrayList<>();
-        JSONArray evaluarDevice = null;
-        String uuidPhysical = "";
-        try{
-            JSONObject json = Util.parseJSONFile(lugarDelArchivo);
-            JSONObject identifica = json.getJSONObject(tapiContext).
-                    getJSONObject(physicalContext);
-            uuidPhysical = identifica.getString("uuid");
-            evaluarDevice = identifica.getJSONArray(device);
-            JSONArray identificaElementos = identifica.getJSONArray(device);
-            for(Object objetos : identificaElementos){
-                JSONObject lineaDeElementos = (JSONObject) objetos;
-                Map<String, Object> objectMap = lineaDeElementos.toMap();
-                for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-                    listaDeColumnas.add(entry.getKey());
+
+    private boolean insertarMatrizDevice(List<String> listaDeColumnas, Conexion.DBConnector dataBase, JSONObject evaluarADevice, String device) {
+        Map<String, String> exp_Device = new HashMap<String, String>();
+        for (String objectos : listaDeColumnas) {
+            String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
+            if (nombreColumna.equals("uuid")) {
+                exp_Device.put(nombreColumna, "varchar(50) primary key");
+            } else {
+                exp_Device.put(nombreColumna, "MEDIUMTEXT");
+            }
+        }
+        exp_Device.put("uuid_physical_context","varchar(250) , FOREIGN KEY (uuid_physical_context) REFERENCES exp_physical(uuid)");
+        try {
+            tablaDevice = Util.crearTablasGenericoMap(dataBase, "exp_physical_device", tablaDevice,
+                    exp_Device);
+            DBRecord record = tablaDevice.newRecord();
+            JSONArray evaluarATopologyContext = evaluarADevice.getJSONArray(device);
+            for (Object objectEvaluado : evaluarATopologyContext) {
+                JSONObject objetosEvaluadoDeJson = (JSONObject) objectEvaluado;
+                Map<String, Object> objetosMap = objetosEvaluadoDeJson.toMap();
+                record = tablaDevice.newRecord();
+                for (Map.Entry<String, Object> entry : objetosMap.entrySet()) {
+                    if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()) {
+                        record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"),
+                                entry.getValue().toString());
+                    } else {
+                        record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"), null);
+                    }
+                }
+                try {
+                    record.addField("uuid_physical_context",evaluarADevice.getString("uuid"));
+                    tablaDevice.insert(record);
+                } catch (SQLException exception) {
+                    exception.printStackTrace();
                 }
             }
-        } catch (Exception exception) {
-            System.out.println("error:: " + exception.getMessage());
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return false;
         }
-        String[][] dicDevice = new String[][]{
-                {
-                        "id","int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY"
-                },
-                {
-                        "atribute_name","varchar(250)"
-                }
-        };
+        return true;
+    }
+
+    private boolean insertarDiccionarioDevice(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
+        String[][] dicDevice = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
+                { "atribute_name", "varchar(250)" } };
         listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
-        for (String objetos : listaDeColumnas){
-            String nombreColumna = objetos.replaceAll("-","_").replaceAll(":","_");
-            if(nombreColumna.equals("uuid")){
-                exp_device.put(nombreColumna, "varchar(50) PRIMARY KEY ");
-            }else{
-                exp_device.put(nombreColumna, "MEDIUMTEXT");
+        try {
+            String nombreTabla = "dic_physical_device";
+            System.out.println("	-------------Creando tabla: " + nombreTabla);
+            tablaDicDevice = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicDevice, dicDevice);
 
-            }
-        }
-        exp_device.put("uuid_physical_context","varchar(250) , FOREIGN KEY (uuid_physical_context) REFERENCES exp_physical_context(uuid)");
-        dataBase = new Conexion.DBConnector();
-        tablaDictDevice = Util.crearTablasGenerico(dataBase,"dic_device",tablaDictDevice,dicDevice);
-        tablaDevice = Util.crearTablasGenericoMap(dataBase,"exp_physical_device",tablaDevice,exp_device);
-        DBRecord recorre = tablaDevice.newRecord();
-        for(String objetos : listaDeColumnas){
-            recorre = tablaDictDevice.newRecord();
-            try {
+            DBRecord recorre = tablaDicDevice.newRecord();
+            for (String objetos : listaDeColumnas) {
+                recorre = tablaDicDevice.newRecord();
                 recorre.addField("atribute_name", objetos);
-                tablaDictDevice.insert(recorre);
+                tablaDicDevice.insert(recorre);
 
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
+        } catch (SQLException | ClassNotFoundException e) {
+            return false;
         }
-        DBRecord record = tablaDevice.newRecord();
-        for (Object objetosDevice : evaluarDevice){
-            JSONObject objetosEvaluadoDeJson = (JSONObject) objetosDevice;
-            Map<String, Object> objetosMap = objetosEvaluadoDeJson.toMap();
-            record = tablaDevice.newRecord();
-            for (Map.Entry<String, Object> entry : objetosMap.entrySet()){
-                if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()){
-                    record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), entry.getValue().toString());
-                } else {
-                    record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), null);
-                }
-            }
-            try {
-                record.addField("uuid_physical_context",uuidPhysical);
-                tablaDevice.insert(record);
-            } catch (SQLException exception) {
-                exception.printStackTrace();
-            }
-        }
+        return true;
     }
+
 }

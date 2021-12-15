@@ -21,18 +21,93 @@ public class AccessPortMain {
 
     public static void main(String[] args) {
         AccessPortMain main = new AccessPortMain();
-        main.llamarAccessPort("D:\\archivos\\objetociena.json","tapi-common:context",
+        main.analizarInformacionAccessPort("D:\\archivos\\objetociena.json","tapi-common:context",
                 "tapi-equipment:physical-context","device","access-port");
     }
-    public void llamarAccessPort(String rutaDelArchivo,String tapiContext,
-                                 String physicalContext,String device, String accessport){
-        AccessPortMain main = new AccessPortMain();
+    public Boolean analizarInformacionAccessPort(String rutaDeArchivo, String tapiContext, String tapiTopology,
+                                                String device, String accessPort) {
+        boolean analizo = false;
+        boolean insertoDiccionarioAccessPort = false;
+        boolean insertoMatrizAccessPort = false;
+        System.out.println("-------------Procesando informacion de: " + accessPort + "------- \n");
         try {
-            main.insertarAccessPort(rutaDelArchivo,tapiContext,physicalContext,device,accessport);
-        } catch (Exception exception) {
-            exception.printStackTrace();
+            dataBase = new Conexion.DBConnector();
+            JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
+            JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
+                    tapiContext, tapiTopology);
+            JSONArray deviceArray = objetoTopologyContext.getJSONArray(device);
+            JSONObject nodeContext = (JSONObject) deviceArray.get(0);
+            if(nodeContext.has(accessPort)){
+                JSONArray listaDeEquipment = nodeContext.getJSONArray(accessPort);
+            }
+
+            List<String> listaColumnas = Util.listaDeColumnasPadreArray(deviceArray, accessPort);
+            insertoDiccionarioAccessPort = insertarDiccionarioAccessPort(listaColumnas, dataBase);
+            insertoMatrizAccessPort = insertarMatrizAccessPort(listaColumnas, dataBase, deviceArray,accessPort);
+            System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioAccessPort  + "/ "+ insertoMatrizAccessPort);
+            analizo = insertoDiccionarioAccessPort && insertoMatrizAccessPort ? true : false;
+        } catch (Exception e) {
+            analizo = false;
+            System.out.println("-------------Procesando con errores: " + e.getMessage());
+            e.printStackTrace();
         }
+        return analizo;
     }
+
+    private boolean insertarMatrizAccessPort(List<String> listaDeColumnas, Conexion.DBConnector dataBase, JSONArray deviceArray, String accessPort) {
+        Map<String, String> exp_accessport = new HashMap<>();
+        for (String objectos : listaDeColumnas) {
+            String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
+            if (nombreColumna.equals("uuid")) {
+                exp_accessport.put(nombreColumna, "varchar(50) primary key");
+            } else {
+                exp_accessport.put(nombreColumna, "MEDIUMTEXT");
+            }
+        }
+        try{
+            exp_accessport.put("uuid_device","varchar(250) , foreign key (uuid_device) references exp_physical_device(uuid)");
+            tablaAccessPort = Util.crearTablasGenericoMap(dataBase,"exp_physical_access_port",tablaAccessPort,exp_accessport);
+            DBRecord record = tablaAccessPort.newRecord();
+            for (Object objetosNode : deviceArray){
+                JSONObject deviceUuid = (JSONObject) objetosNode;
+                String columnaUuid = deviceUuid.get("uuid").toString();
+                if(deviceUuid.has(accessPort)){
+                    JSONArray listAccesPort = deviceUuid.getJSONArray(accessPort);
+                    for (Object objectEvaluado : listAccesPort){
+                        JSONObject columnasDeObjeto = (JSONObject) objectEvaluado;
+                        record = tablaAccessPort.newRecord();
+                        insertarInformacion(record, columnasDeObjeto, listaDeColumnas, columnaUuid);
+                    }
+                }
+            }
+        }catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean insertarDiccionarioAccessPort(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
+        String[][] dicAccessPort = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
+                { "atribute_name", "varchar(250)" } };
+        listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
+        try {
+            String nombreTabla = "dic_physical_access_port";
+            System.out.println("	-------------Creando tabla: " + nombreTabla);
+            tablaDicAccessPort = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicAccessPort, dicAccessPort);
+
+            DBRecord recorre = tablaDicAccessPort.newRecord();
+            for (String objetos : listaDeColumnas) {
+                recorre = tablaDicAccessPort.newRecord();
+                recorre.addField("atribute_name", objetos);
+                tablaDicAccessPort.insert(recorre);
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
     public void insertarAccessPort(String lugarDelArchivo, String tapiContext,
                                    String physicalContext, String device, String accessport) throws SQLException, ClassNotFoundException {
         Map<String, String> exp_accessport = new HashMap<>();

@@ -8,7 +8,6 @@ import util.Util;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +37,8 @@ public class PhysicalContextMain {
                     tapiContext);
 
             List<String> listaColumnas = Util.padreObject(objetoTopologyContext, physicalContext);
-            insertoDiccionarioPhysical = insertarDiccionarioOwned(listaColumnas, dataBase);
-            insertoMatrizPhysical = insertarMatrizOwnedNode(listaColumnas, dataBase, objetoTopologyContext, physicalContext);
+            insertoDiccionarioPhysical = insertarDiccionarioPhysical(listaColumnas, dataBase);
+            insertoMatrizPhysical = insertarMatrizPhysical(listaColumnas, dataBase, objetoTopologyContext, physicalContext);
             System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioPhysical  + "/ "+ insertoMatrizPhysical);
             analizo = insertoDiccionarioPhysical && insertoMatrizPhysical ? true : false;
 
@@ -52,8 +51,8 @@ public class PhysicalContextMain {
         return analizo;
     }
 
-    private boolean insertarMatrizOwnedNode(List<String> listaDeColumnas, Conexion.DBConnector dataBase,
-                                            JSONObject objetoTopologyContext, String physicalContext) {
+    private boolean insertarMatrizPhysical(List<String> listaDeColumnas, Conexion.DBConnector dataBase,
+                                           JSONObject objetoTopologyContext, String physicalContext) {
         Map<String, String> exp_Physical = new HashMap<>();
         for (String objectos : listaDeColumnas) {
             String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
@@ -89,7 +88,7 @@ public class PhysicalContextMain {
         return true;
     }
 
-    private boolean insertarDiccionarioOwned(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
+    private boolean insertarDiccionarioPhysical(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
         String[][] dicPhysical = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
                 { "atribute_name", "varchar(250)" }};
         listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
@@ -109,67 +108,4 @@ public class PhysicalContextMain {
         return true;
     }
 
-    public void insertarPhysical(String lugarDelArchivo, String tapiContext, String physicalContext) throws SQLException, ClassNotFoundException {
-        Map<String, String> exp_physical = new HashMap<>();
-        List<String> listaDeColumnas = new ArrayList<>();
-        JSONObject objectEvaluado = null;
-        try {
-            JSONObject json = Util.parseJSONFile(lugarDelArchivo);
-            JSONObject identificaDevice = json.getJSONObject(tapiContext).
-                    getJSONObject(physicalContext);
-            objectEvaluado = identificaDevice;
-            Map<String, Object> objectMap = objectEvaluado.toMap();
-            for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-                listaDeColumnas.add(entry.getKey());
-            }
-        } catch (Exception exception) {
-            System.out.println("error:: " + exception.getMessage());
-        }
-        String[][] dicPhysical = new String[][]{
-                {
-                        "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY"
-                },
-                {
-                        "atribute_name", "varchar(250)"
-                }
-        };
-        listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
-        for (String objectos : listaDeColumnas) {
-            String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
-            if (nombreColumna.equals("uuid")) {
-                exp_physical.put(nombreColumna, "varchar(50) primary key ");
-            } else {
-                exp_physical.put(nombreColumna, "MEDIUMTEXT");
-            }
-        }
-        dataBase = new Conexion.DBConnector();
-        tablaDicPhysical = Util.crearTablasGenerico(dataBase, "dic_Physical", tablaDicPhysical, dicPhysical);
-        tablaExpPhysical = Util.crearTablasGenericoMap(dataBase, "exp_physical_context", tablaExpPhysical, exp_physical);
-        DBRecord recorre = tablaDicPhysical.newRecord();
-        for (String objetos : listaDeColumnas) {
-            recorre = tablaDicPhysical.newRecord();
-            try {
-                recorre.addField("atribute_name", objetos);
-                tablaDicPhysical.insert(recorre);
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        DBRecord record = tablaExpPhysical.newRecord();
-        Map<String, Object> objetosMap = objectEvaluado.toMap();
-        record = tablaExpPhysical.newRecord();
-        for (Map.Entry<String, Object> entry : objetosMap.entrySet()) {
-            if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()) {
-                record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"), entry.getValue().toString());
-            } else {
-                record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"), null);
-            }
-        }
-        try {
-            tablaExpPhysical.insert(record);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
-    }
 }
