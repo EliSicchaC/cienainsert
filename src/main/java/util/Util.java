@@ -110,6 +110,23 @@ public class Util {
 		}
 		return listaDeColumnas;
 	}
+	public static List<String> columnasNoEncontradas(JSONArray nodoConLasColumnas, String nodo) {
+		List<String> listaDeColumnas = new ArrayList<>();
+		for (Object objetosNode : nodoConLasColumnas) {
+			JSONObject ownedNode = (JSONObject) objetosNode;
+			if(ownedNode.has(nodo)){
+				JSONArray listaDeEdgePoint = ownedNode.getJSONArray(nodo);
+				for (Object objetoEvaluado : listaDeEdgePoint) {
+					JSONObject objetoEvaluadoJson = (JSONObject) objetoEvaluado;
+					Map<String, Object> objectMap = objetoEvaluadoJson.toMap();
+					for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+						listaDeColumnas.add(entry.getKey());
+					}
+				}
+			}
+		}
+		return listaDeColumnas;
+	}
 
 	public static List<String> listaDeColumnasPadreObject(JSONObject nodoConLasColumnas, String nodo) {
 		List<String> listaDeColumnas = new ArrayList<>();
