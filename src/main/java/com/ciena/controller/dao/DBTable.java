@@ -16,9 +16,11 @@ public class DBTable {
 
         Statement stmt = conn.createStatement();
         String sql = "DROP TABLE IF EXISTS " + tableName;
-
+        System.out.println("ELIMINANDO TABLA" + tableName);
         if (recreateTables == 1) {
             stmt.execute(sql);
+
+            System.out.println("Consulta: "+ sql);
         }
 
     }
@@ -39,7 +41,7 @@ public class DBTable {
             stmt.execute(sql.toString());
         }
     }
-    public void createTableMap(Map<String, String> fields) throws SQLException {
+    public void    createTableMap(Map<String, String> fields) throws SQLException {
         StringBuffer sql = new StringBuffer("CREATE TABLE " + tableName + " (");
         //EN SQL VA EL NOMBRE Y TIPO DE DATO Y TAMBIEN \n(CODIGO ASCCI) SIGNIFICA SALTO DE LINEA
         String prefix = " ";
@@ -64,7 +66,7 @@ public class DBTable {
             stmt.execute(prefix.toString());
         }
     }
-    public void eliminarForeignKey()throws SQLException {
+    public void eliminarTabla()throws SQLException {
         String prefix = " DROP TABLE " + tableName ;
         Statement stmt = conn.createStatement();
 

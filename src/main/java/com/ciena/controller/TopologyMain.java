@@ -19,10 +19,14 @@ public class TopologyMain {
 	private static DBTable tablaTopology;
 	private static DBTable tablaDicTopology;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SQLException, ClassNotFoundException {
 		TopologyMain main = new TopologyMain();
 		main.analizarInformacionTopoloy("D:\\archivos\\objetociena.json", "tapi-common:context", "tapi-topology:topology-context",
 				"topology");
+	}
+	public TopologyMain() throws SQLException, ClassNotFoundException {
+		dataBase = new Conexion.DBConnector();
+		tablaTopology = dataBase.deleteTableIfExsist("exp_topology");
 	}
 
 	public Boolean analizarInformacionTopoloy(String rutaDeArchivo, String tapiContext, String tapiTopology,
@@ -32,7 +36,7 @@ public class TopologyMain {
 		boolean insertoMatrizTopology = false;
 		System.out.println("-------------Procesando informacion de: " + topology + "------- \n");
 		try {
-			dataBase = new Conexion.DBConnector();
+			//dataBase = new Conexion.DBConnector();
 			//AQUI ME ESTOY POSICIONANDO EN TAPITOPOLOGY
 			JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
 			JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,

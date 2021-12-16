@@ -1,12 +1,13 @@
 package interfaz;
 
-import com.ciena.controller.PhysicalContextMain;
-import com.ciena.controller.OwnedNodePoint;
+import com.ciena.controller.*;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -75,25 +76,57 @@ public class Interfaz extends JFrame {
 
                     if (path != "") {
                         analizando.setVisible(true);
-                        PhysicalContextMain physicalContextInformacion = new PhysicalContextMain();
-                        OwnedNodePoint topologyInformacion = new OwnedNodePoint();
-                        /*try {
-                            Boolean estadoProceso = physicalContextInformacion.analizarInformacionPhysicalContext(path);
-                            Boolean proceso = topologyInformacion.analizarInformacionTopoloyContext(path);
-                            if (estadoProceso) {
-                                analizando.setText("Proceso exitoso!");
-                            }else{
-                                analizando.setText("Proceso Fallido!");
-                            }
-                         catch (IOException ex) {
-                            analizando.setText("Proceso Fallido!");
+
+                        PhysicalContextMain physicalContextMain = new PhysicalContextMain();
+                        DeviceMain deviceMain = new DeviceMain();
+                        EquipmentMain equipmentMain = new EquipmentMain();
+                        AccessPortMain accessPortMain = new AccessPortMain();
+
+                        TopologyMain topologyMain = null;
+                        LinkMain linkmain = null;
+                        NodeMain nodeMain =null;
+                        OwnedNodePoint ownedNodePoint = null;
+                        try {
+                            linkmain = new LinkMain();
+                            ownedNodePoint = new OwnedNodePoint();
+                            nodeMain = new NodeMain();
+                            topologyMain = new TopologyMain();
+                        } catch (SQLException ex) {
                             ex.printStackTrace();
-                        }*/
+                        } catch (ClassNotFoundException ex) {
+                            ex.printStackTrace();
+                        }
+
+
+/*
+                        Boolean physical = physicalContextMain.analizarInformacionPhysicalContext("D:\\archivos\\objetociena.json","tapi-common:context",
+                                "tapi-equipment:physical-context");
+                        Boolean device = deviceMain.analizarInformacionDevice("D:\\archivos\\objetociena.json","tapi-common:context",
+                                "tapi-equipment:physical-context","device");
+                        Boolean equipment = equipmentMain.analizarInformacionEquipment("D:\\archivos\\objetociena.json","tapi-common:context",
+                                "tapi-equipment:physical-context","device","equipment");
+                        Boolean accessport = accessPortMain.analizarInformacionAccessPort("D:\\archivos\\objetociena.json","tapi-common:context",
+                                "tapi-equipment:physical-context","device","access-port");
+
+*/
+                        Boolean topology = topologyMain.analizarInformacionTopoloy("D:\\archivos\\objetociena.json","tapi-common:context",
+                                "tapi-topology:topology-context","topology");
+                        Boolean node = nodeMain.analizarInformacionNode("D:\\archivos\\objetociena.json","tapi-common:context",
+                                "tapi-topology:topology-context","topology","node");
+                        Boolean owned = ownedNodePoint.analizarInformacionOwned("D:\\archivos\\objetociena.json", "tapi-common:context",
+                                "tapi-topology:topology-context", "topology", "node", "owned-node-edge-point");
+                        Boolean link = linkmain.analizarInformacionLink("D:\\archivos\\objetociena.json", "tapi-common:context",
+                                "tapi-topology:topology-context", "topology", "link","node-edge-point");
+
+                        if (topology && link && node && owned) {
+                            analizando.setText("Proceso exitoso!");
+                        }else{
+                            analizando.setText("Proceso Fallido!");
+                        }
                     }
                 }
             }
         });
-
     }
 
     public void addInfo(final String string) {

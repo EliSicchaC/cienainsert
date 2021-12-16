@@ -17,9 +17,12 @@ public class OwnedNodePoint {
 	private static Conexion.DBConnector dataBase;
 	private static DBTable tablaOwnedNode;
 	private static DBTable tablaDiccionario;
-
+	public OwnedNodePoint() throws SQLException, ClassNotFoundException {
+		dataBase = new Conexion.DBConnector();
+		tablaOwnedNode = dataBase.deleteTableIfExsist("exp_topology_owned_node_edgepoint");
+	}
 	// Se crea un metodo main, para poder ejecutarlo y tambien conectarnos al json
-	public static void main(final String[] args) throws IOException {
+	public static void main(final String[] args) throws IOException, SQLException, ClassNotFoundException {
 		OwnedNodePoint mainTopology = new OwnedNodePoint();
 		mainTopology.analizarInformacionOwned("D:\\archivos\\objetociena.json", "tapi-common:context",
 				"tapi-topology:topology-context", "topology", "node", "owned-node-edge-point");
@@ -32,7 +35,7 @@ public class OwnedNodePoint {
 		boolean insertoMatrizOwned = false;
 		System.out.println("-------------Procesando informacion de: " + ownedPoint + "------- \n");
 		try {
-			dataBase = new Conexion.DBConnector();
+			//dataBase = new Conexion.DBConnector();
 			JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
 			JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
 					tapiContext, tapiTopology);

@@ -18,7 +18,11 @@ public class NodeMain {
     private static DBTable tablaNode;
     private static DBTable tablaDicNode;
 
-    public static void main(String[] args) {
+    public NodeMain() throws SQLException, ClassNotFoundException {
+        dataBase = new Conexion.DBConnector();
+        tablaNode = dataBase.deleteTableIfExsist("exp_topology_node");
+    }
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
         NodeMain main = new NodeMain();
         main.analizarInformacionNode("D:\\archivos\\objetociena.json","tapi-common:context",
                 "tapi-topology:topology-context","topology","node");
@@ -30,7 +34,7 @@ public class NodeMain {
         boolean insertoMatrizNode = false;
         System.out.println("-------------Procesando informacion de: " + node + "------- \n");
         try {
-            dataBase = new Conexion.DBConnector();
+            //dataBase = new Conexion.DBConnector();
             JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
             JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
                     tapiContext, tapiTopology);

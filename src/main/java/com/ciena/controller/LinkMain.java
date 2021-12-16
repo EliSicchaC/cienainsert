@@ -19,8 +19,11 @@ public class LinkMain {
 	private static Conexion.DBConnector dataBase;
 	private static DBTable tablaLink;
 	private static DBTable tablaDicLink;
-
-	public static void main(final String[] args) throws IOException {
+	public LinkMain() throws SQLException, ClassNotFoundException {
+		dataBase = new Conexion.DBConnector();
+		tablaLink = dataBase.deleteTableIfExsist("exp_topology_link");
+	}
+	public static void main(final String[] args) throws IOException, SQLException, ClassNotFoundException {
 		LinkMain linkMain = new LinkMain();
 		linkMain.analizarInformacionLink("D:\\archivos\\objetociena.json", "tapi-common:context",
 				"tapi-topology:topology-context", "topology", "link","node-edge-point");
@@ -32,7 +35,7 @@ public class LinkMain {
 		boolean insertoMatrizLink = false;
 		System.out.println("-------------Procesando informacion de: " + link + "------- \n");
 		try {
-			dataBase = new Conexion.DBConnector();
+			//dataBase = new Conexion.DBConnector();
 			//AQUI ME ESTOY POSICIONANDO EN TAPITOPOLOGY
 			JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
 			JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
