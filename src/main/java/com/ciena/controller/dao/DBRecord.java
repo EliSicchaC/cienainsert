@@ -22,7 +22,7 @@ public class DBRecord {
     }
 
     public void addField(String name, int value) {
-      //  fields.add(new IntDBField(name, value));
+      fields.add(new IntDBField(name, value));
     }
 
     public int doTheInsertIncrement(Connection conn) throws SQLException {

@@ -35,7 +35,7 @@ public class LinkMain {
 		boolean insertoMatrizLink = false;
 		System.out.println("-------------Procesando informacion de: " + link + "------- \n");
 		try {
-			//dataBase = new Conexion.DBConnector();
+
 			//AQUI ME ESTOY POSICIONANDO EN TAPITOPOLOGY
 			JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
 			JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
@@ -46,8 +46,16 @@ public class LinkMain {
 			JSONArray listaDeLink = linkContext.getJSONArray(link);
 			//PADRE TOPOLOGY Y HIJO LINK
 			List<String> listaColumnas = Util.listaDeColumnasPadreArray(topologyArray, link);
-			insertoDiccionarioLink = insertarDiccionarioLink(listaColumnas, dataBase);
-			insertoMatrizLink = insertarMatrizLink(listaColumnas, dataBase, topologyArray,link,nodeEdgePoint);
+			String tablaReferencia = "exp_topology";
+			String columnaRefencia = "uuid";
+			String nombreDeColumna = "uuid_topology";
+			String columna = "uuid_ownedNodePoint";
+			String referencia = "exp_topology_node_onep";
+			String referenciaUuid = "uuid";
+			insertoMatrizLink = insertarMatrizLink(listaColumnas, dataBase, topologyArray,link,nodeEdgePoint,tablaReferencia,columnaRefencia,nombreDeColumna,
+					columna,referencia,referenciaUuid);
+			insertoDiccionarioLink = insertarDiccionarioLink(listaColumnas, dataBase,tablaReferencia,columnaRefencia,nombreDeColumna,columna,
+					referencia,referenciaUuid);
 			System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioLink  + "/ "+ insertoMatrizLink);
 			analizo = insertoDiccionarioLink && insertoMatrizLink ? true : false;
 		} catch (Exception e) {
@@ -59,7 +67,7 @@ public class LinkMain {
 	}
 
 	private boolean insertarMatrizLink(List<String> listaDeColumnas, Conexion.DBConnector dataBase,
-									   JSONArray evaluarALink, String link,String nodeEdgePoint) {
+									   JSONArray evaluarALink, String link, String nodeEdgePoint, String tablaReferencia, String columnaRefencia, String nombreDeColumna, String columna, String referencia, String referenciaUuid) {
 		Map<String, String> exp_Link = new HashMap<>();
 		for (String objectos : listaDeColumnas) {
 			// INSERTANDO DATA
@@ -70,15 +78,15 @@ public class LinkMain {
 				exp_Link.put(nombreColumna, "MEDIUMTEXT");
 			}
 		}
-		exp_Link.put("uuid_topology", "varchar(250) , FOREIGN KEY  (uuid_topology) REFERENCES exp_topology(uuid)");
-		exp_Link.put("uuid_ownedNodePoint", "varchar(250) , foreign key (uuid_ownedNodePoint) references exp_topology_owned_node_edgepoint(uuid)");
+		exp_Link.put("uuid_topology", "varchar(250) , foreign key (uuid_topology) references exp_topology(uuid)");
+		exp_Link.put("uuid_ownedNodePoint", "varchar(250) , foreign key (uuid_ownedNodePoint) references exp_topology_node_onep(uuid)");
 		try{
 			tablaLink = Util.crearTablasGenericoMap(dataBase, "exp_topology_link", tablaLink, exp_Link);
 			DBRecord record = tablaLink.newRecord();
 
 			for (Object objetosLink : evaluarALink) {
 				JSONObject topologyLink = (JSONObject) objetosLink;
-				String columnaUuid = topologyLink.get("uuid").toString();
+				String columnaUuid = topologyLink.get(columnaRefencia).toString();
 				JSONArray listLink = topologyLink.getJSONArray(link);
 				for (Object objectEvaluado : listLink) {
 					JSONObject objetos = (JSONObject) objectEvaluado;
@@ -90,7 +98,7 @@ public class LinkMain {
 						for (Object objectNode : node) {
 							record = tablaLink.newRecord();
 							JSONObject objetosEvaluadoDeJson = (JSONObject) objectNode;
-							record.addField("uuid_ownedNodePoint",
+							record.addField(columna,
 									objetosEvaluadoDeJson.get("node-edge-point-uuid").toString());
 							//QUE ME TRAIGA TODAS LAS PARTES DE LINK
 							insertarInformacion(record, objetos, listaDeColumnas, columnaUuid);
@@ -109,9 +117,10 @@ public class LinkMain {
 		return true;
 	}
 
-	private boolean insertarDiccionarioLink(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
+	private boolean insertarDiccionarioLink(List<String> listaDeColumnas, Conexion.DBConnector dataBase, String tablaReferencia, String columnaRefencia, String nombreDeColumna, String columna, String referencia, String referenciaUuid) {
 		String[][] dicTopology = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
-				{ "atribute_name", "varchar(250)" } };
+				{ "atribute_name", "varchar(250)" },{ "flag_fk","int(11)"},{"fk_foreing_object_name","varchar(250)"},
+				{"fk_foreing_object_name_atribute","varchar(250)"}};
 		listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
 		try{
 			String nombreTabla = "dic_topology_link";
@@ -121,15 +130,28 @@ public class LinkMain {
 			for (String objetos : listaDeColumnas) {
 				recorre = tablaDicLink.newRecord();
 				recorre.addField("atribute_name", objetos);
+				recorre.addField("flag_fk",0);
 				tablaDicLink.insert(recorre);
 			}
+			recorre = tablaDicLink.newRecord();
+			recorre.addField("atribute_name",nombreDeColumna);
+			recorre.addField("flag_fk", 1);
+			recorre.addField("fk_foreing_object_name",tablaReferencia);
+			recorre.addField("fk_foreing_object_name_atribute",columnaRefencia);
+			tablaDicLink.insert(recorre);
+			recorre = tablaDicLink.newRecord();
+			recorre.addField("atribute_name",columna);
+			recorre.addField("flag_fk", 1);
+			recorre.addField("fk_foreing_object_name",referencia);
+			recorre.addField("fk_foreing_object_name_atribute",referenciaUuid);
+			tablaDicLink.insert(recorre);
+
 		} catch (Exception e) {
 			System.out.println("-------------Procesando con errores: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return true;
 	}
-
 
 	//REFACTORICE LO QUE TRAE TODO LINK PARA USARLO ARRIBA
 	private void insertarInformacion(DBRecord record, JSONObject objetos, List<String> listaDeColumnas,

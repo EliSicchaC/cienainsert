@@ -18,20 +18,24 @@ public class PhysicalContextMain {
     private static DBTable tablaDicPhysical;
     private static DBTable tablaExpPhysical;
 
-
+    public PhysicalContextMain() throws SQLException, ClassNotFoundException {
+        dataBase = new Conexion.DBConnector();
+        tablaExpPhysical = dataBase.deleteTableIfExsist("exp_physical");
+    }
     //  solo esta para probar mis metodos
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException, SQLException, ClassNotFoundException {
         PhysicalContextMain physical = new PhysicalContextMain();
         physical.analizarInformacionPhysicalContext("D:\\archivos\\objetociena.json","tapi-common:context",
                 "tapi-equipment:physical-context");
     }
+
     public Boolean analizarInformacionPhysicalContext(String rutaDelArchivo,String tapiContext,String physicalContext){
         boolean analizo = false;
         boolean insertoDiccionarioPhysical = false;
         boolean insertoMatrizPhysical = false;
         System.out.println("-------------Procesando informacion de: " + physicalContext + "------- \n");
         try{
-            dataBase = new Conexion.DBConnector();
+
             JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDelArchivo);
             JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasAPadre(contenidoObjetosTotales,
                     tapiContext);
@@ -52,7 +56,7 @@ public class PhysicalContextMain {
     }
 
     private boolean insertarMatrizPhysical(List<String> listaDeColumnas, Conexion.DBConnector dataBase,
-                                           JSONObject objetoTopologyContext, String physicalContext) {
+                                            JSONObject objetoTopologyContext, String physicalContext) {
         Map<String, String> exp_Physical = new HashMap<>();
         for (String objectos : listaDeColumnas) {
             String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");

@@ -19,7 +19,11 @@ public class AccessPortMain {
     private static DBTable tablaDicAccessPort;
     private static DBTable tablaAccessPort;
 
-    public static void main(String[] args) {
+    public AccessPortMain() throws SQLException, ClassNotFoundException {
+        dataBase = new Conexion.DBConnector();
+        tablaAccessPort = dataBase.deleteTableIfExsist("exp_physical_access_port");
+    }
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
         AccessPortMain main = new AccessPortMain();
         main.analizarInformacionAccessPort("D:\\archivos\\objetociena.json","tapi-common:context",
                 "tapi-equipment:physical-context","device","access-port");
@@ -31,7 +35,7 @@ public class AccessPortMain {
         boolean insertoMatrizAccessPort = false;
         System.out.println("-------------Procesando informacion de: " + accessPort + "------- \n");
         try {
-            dataBase = new Conexion.DBConnector();
+
             JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
             JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
                     tapiContext, tapiTopology);
@@ -42,8 +46,13 @@ public class AccessPortMain {
             }
 
             List<String> listaColumnas = Util.columnasNoEncontradas(deviceArray, accessPort);
-            insertoDiccionarioAccessPort = insertarDiccionarioAccessPort(listaColumnas, dataBase);
-            insertoMatrizAccessPort = insertarMatrizAccessPort(listaColumnas, dataBase, deviceArray,accessPort);
+
+            String tablaReferencia = "exp_physical_device_access_port";
+            String columnaRefencia = "uuid";
+            String nombreDeColumna = "uuid_device";
+
+            insertoMatrizAccessPort = insertarMatrizAccessPort(listaColumnas, dataBase, deviceArray,accessPort,tablaReferencia,columnaRefencia,nombreDeColumna);
+            insertoDiccionarioAccessPort = insertarDiccionarioAccessPort(listaColumnas, dataBase,tablaReferencia,columnaRefencia,nombreDeColumna);
             System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioAccessPort  + "/ "+ insertoMatrizAccessPort);
             analizo = insertoDiccionarioAccessPort && insertoMatrizAccessPort ? true : false;
         } catch (Exception e) {
@@ -54,7 +63,7 @@ public class AccessPortMain {
         return analizo;
     }
 
-    private boolean insertarMatrizAccessPort(List<String> listaDeColumnas, Conexion.DBConnector dataBase, JSONArray deviceArray, String accessPort) {
+    private boolean insertarMatrizAccessPort(List<String> listaDeColumnas, Conexion.DBConnector dataBase, JSONArray deviceArray, String accessPort, String tablaReferencia, String columnaRefencia, String nombreDeColumna) {
         Map<String, String> exp_accessport = new HashMap<>();
         for (String objectos : listaDeColumnas) {
             String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
@@ -65,12 +74,12 @@ public class AccessPortMain {
             }
         }
         try{
-            exp_accessport.put("uuid_device","varchar(250) , foreign key (uuid_device) references exp_physical_device(uuid)");
-            tablaAccessPort = Util.crearTablasGenericoMap(dataBase,"exp_physical_access_port",tablaAccessPort,exp_accessport);
+            exp_accessport.put(nombreDeColumna,"varchar(250) , foreign key (uuid_device) references exp_physical_device(uuid)");
+            tablaAccessPort = Util.crearTablasGenericoMap(dataBase,"exp_physical_device_access_port",tablaAccessPort,exp_accessport);
             DBRecord record = tablaAccessPort.newRecord();
             for (Object objetosNode : deviceArray){
                 JSONObject deviceUuid = (JSONObject) objetosNode;
-                String columnaUuid = deviceUuid.get("uuid").toString();
+                String columnaUuid = deviceUuid.get(columnaRefencia).toString();
                 if(deviceUuid.has(accessPort)){
                     JSONArray listAccesPort = deviceUuid.getJSONArray(accessPort);
                     for (Object objectEvaluado : listAccesPort){
@@ -87,12 +96,13 @@ public class AccessPortMain {
         return true;
     }
 
-    private boolean insertarDiccionarioAccessPort(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
+    private boolean insertarDiccionarioAccessPort(List<String> listaDeColumnas, Conexion.DBConnector dataBase, String tablaReferencia, String columnaRefencia, String nombreDeColumna) {
         String[][] dicAccessPort = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
-                { "atribute_name", "varchar(250)" } };
+                { "atribute_name", "varchar(250)" },{ "flag_fk","int(11)"},{"fk_foreign_object_name","varchar(250)"},
+                {"fk_foreign_object_name_atribute","varchar(250)"} };
         listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
         try {
-            String nombreTabla = "dic_physical_access_port";
+            String nombreTabla = "dic_physical_device_access_port";
             System.out.println("	-------------Creando tabla: " + nombreTabla);
             tablaDicAccessPort = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicAccessPort, dicAccessPort);
 
@@ -100,8 +110,15 @@ public class AccessPortMain {
             for (String objetos : listaDeColumnas) {
                 recorre = tablaDicAccessPort.newRecord();
                 recorre.addField("atribute_name", objetos);
+                recorre.addField("flag_fk",0);
                 tablaDicAccessPort.insert(recorre);
             }
+            recorre = tablaDicAccessPort.newRecord();
+            recorre.addField("atribute_name",nombreDeColumna);
+            recorre.addField("flag_fk", 1);
+            recorre.addField("fk_foreign_object_name",tablaReferencia);
+            recorre.addField("fk_foreign_object_name_atribute",columnaRefencia);
+            tablaDicAccessPort.insert(recorre);
         } catch (SQLException | ClassNotFoundException e) {
             return false;
         }

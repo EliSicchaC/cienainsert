@@ -28,7 +28,6 @@ public class TopologyMain {
 		dataBase = new Conexion.DBConnector();
 		tablaTopology = dataBase.deleteTableIfExsist("exp_topology");
 	}
-
 	public Boolean analizarInformacionTopoloy(String rutaDeArchivo, String tapiContext, String tapiTopology,
 			String topology) {
 		boolean analizo = false;
@@ -36,7 +35,7 @@ public class TopologyMain {
 		boolean insertoMatrizTopology = false;
 		System.out.println("-------------Procesando informacion de: " + topology + "------- \n");
 		try {
-			//dataBase = new Conexion.DBConnector();
+
 			//AQUI ME ESTOY POSICIONANDO EN TAPITOPOLOGY
 			JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
 			JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,

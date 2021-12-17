@@ -19,7 +19,7 @@ public class OwnedNodePoint {
 	private static DBTable tablaDiccionario;
 	public OwnedNodePoint() throws SQLException, ClassNotFoundException {
 		dataBase = new Conexion.DBConnector();
-		tablaOwnedNode = dataBase.deleteTableIfExsist("exp_topology_owned_node_edgepoint");
+		tablaOwnedNode = dataBase.deleteTableIfExsist("exp_topology_node_onep");
 	}
 	// Se crea un metodo main, para poder ejecutarlo y tambien conectarnos al json
 	public static void main(final String[] args) throws IOException, SQLException, ClassNotFoundException {
@@ -35,7 +35,7 @@ public class OwnedNodePoint {
 		boolean insertoMatrizOwned = false;
 		System.out.println("-------------Procesando informacion de: " + ownedPoint + "------- \n");
 		try {
-			//dataBase = new Conexion.DBConnector();
+
 			JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
 			JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
 					tapiContext, tapiTopology);
@@ -44,8 +44,11 @@ public class OwnedNodePoint {
 			JSONArray listaDeNode = ownedNode.getJSONArray(node);
 
 			List<String> listaColumnas = Util.listaDeColumnasPadreArray(listaDeNode, ownedPoint);
-			insertoDiccionarioOwned = insertarDiccionarioOwned(listaColumnas, dataBase);
-			insertoMatrizOwned = insertarMatrizOwnedNode(listaColumnas, dataBase, listaDeNode, ownedPoint);
+			String tablaReferencia = "exp_topology_node";
+			String columnaRefencia = "uuid";
+			String nombreDeColumna = "uuid_node";
+			insertoMatrizOwned = insertarMatrizOwnedNode(listaColumnas, dataBase, listaDeNode, ownedPoint, tablaReferencia,columnaRefencia,nombreDeColumna);
+			insertoDiccionarioOwned = insertarDiccionarioOwned(listaColumnas, dataBase,tablaReferencia,columnaRefencia,nombreDeColumna);
 			System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioOwned  + "/ "+ insertoMatrizOwned);
 			analizo = insertoDiccionarioOwned && insertoMatrizOwned ? true : false;
 		} catch (Exception e) {
@@ -57,21 +60,28 @@ public class OwnedNodePoint {
 		return analizo;
 	}
 
-	private Boolean insertarDiccionarioOwned(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
+	private Boolean insertarDiccionarioOwned(List<String> listaDeColumnas, Conexion.DBConnector dataBase, String tablaReferencia, String columnaRefencia, String nombreDeColumna) {
 		String[][] dicOwnedpoint = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
-				{ "atribute_name", "varchar(250)" }};
+				{ "atribute_name", "varchar(250)" },{ "flag_fk","int(11)"},{"fk_foreing_object_name","varchar(250)"},
+				{"fk_foreing_object_name_atribute","varchar(250)"}};
 		listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
 		try {
-			String nombreTabla = "dic_topology_onep";
+			String nombreTabla = "dic_topology_node_onep";
 			System.out.println("	-------------Creando tabla: " + nombreTabla);
 			tablaDiccionario = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDiccionario, dicOwnedpoint);
 			DBRecord recorre = tablaDiccionario.newRecord();
 			for (String objetos : listaDeColumnas) {
 				recorre = tablaDiccionario.newRecord();
 				recorre.addField("atribute_name", objetos);
+				recorre.addField("flag_fk",0);
 				tablaDiccionario.insert(recorre);
-
 			}
+			recorre = tablaDiccionario.newRecord();
+			recorre.addField("atribute_name",nombreDeColumna);
+			recorre.addField("flag_fk", 1);
+			recorre.addField("fk_foreing_object_name",tablaReferencia);
+			recorre.addField("fk_foreing_object_name_atribute",columnaRefencia);
+			tablaDiccionario.insert(recorre);
 		} catch (SQLException | ClassNotFoundException e) {
 			return false;
 		}
@@ -79,7 +89,7 @@ public class OwnedNodePoint {
 	}
 
 	private Boolean insertarMatrizOwnedNode(List<String> listaDeColumnas, Conexion.DBConnector dataBase,
-			JSONArray nodoEvaluar, String nodoHijoInsertarData) {
+											JSONArray nodoEvaluar, String nodoHijoInsertarData, String tablaReferencia, String columnaRefencia, String nombreDeColumna) {
 		Map<String, String> tablaOwned = new HashMap<String, String>();
 		for (String objectos : listaDeColumnas) {
 			// INSERTANDO DATA
@@ -90,16 +100,16 @@ public class OwnedNodePoint {
 				tablaOwned.put(nombreColumna, "MEDIUMTEXT");
 			}
 		}
-		tablaOwned.put("uuid_node", "varchar(250) , FOREIGN KEY  (uuid_node) REFERENCES exp_topology_node(uuid)");
+		tablaOwned.put(nombreDeColumna, "varchar(250) , FOREIGN KEY  (uuid_node) REFERENCES exp_topology_node(uuid)");
 		try {
-			tablaOwnedNode = Util.crearTablasGenericoMap(dataBase, "exp_topology_owned_node_edgepoint", tablaOwnedNode,
+			tablaOwnedNode = Util.crearTablasGenericoMap(dataBase, "exp_topology_node_onep", tablaOwnedNode,
 					tablaOwned);
 			DBRecord record = tablaOwnedNode.newRecord();
 			for (Object objetosNode : nodoEvaluar) {
 				// JSONOBJECT ES PARA TRAER UN OBJETO DEL JSON
 				JSONObject ownedNode = (JSONObject) objetosNode;
 				// QUIERO ATRAER EL UUID DE OWNEDNODE PARA LUEGO IMPLEMENTARLO EN LA BD
-				String columnaUuid = ownedNode.get("uuid").toString();
+				String columnaUuid = ownedNode.get(columnaRefencia).toString();
 				JSONArray listEdgePoint = ownedNode.getJSONArray(nodoHijoInsertarData);
 				for (Object objectEvaluado : listEdgePoint) {
 					JSONObject objetosEvaluadoDeJson = (JSONObject) objectEvaluado;
@@ -113,7 +123,7 @@ public class OwnedNodePoint {
 							record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"), null);
 						}
 					}
-					record.addField("uuid_node", columnaUuid);
+					record.addField(nombreDeColumna, columnaUuid);
 					tablaOwnedNode.insert(record);
 
 				}

@@ -77,10 +77,10 @@ public class Interfaz extends JFrame {
                     if (path != "") {
                         analizando.setVisible(true);
 
-                        PhysicalContextMain physicalContextMain = new PhysicalContextMain();
-                        DeviceMain deviceMain = new DeviceMain();
-                        EquipmentMain equipmentMain = new EquipmentMain();
-                        AccessPortMain accessPortMain = new AccessPortMain();
+                        PhysicalContextMain physicalContextMain = null;
+                        DeviceMain deviceMain = null;
+                        EquipmentMain equipmentMain = null;
+                        AccessPortMain accessPortMain = null;
 
                         TopologyMain topologyMain = null;
                         LinkMain linkmain = null;
@@ -91,31 +91,34 @@ public class Interfaz extends JFrame {
                             ownedNodePoint = new OwnedNodePoint();
                             nodeMain = new NodeMain();
                             topologyMain = new TopologyMain();
+
+                            equipmentMain = new EquipmentMain();
+                            accessPortMain = new AccessPortMain();
+                            deviceMain = new DeviceMain();
+                            physicalContextMain = new PhysicalContextMain();
+
                         } catch (SQLException ex) {
                             ex.printStackTrace();
                         } catch (ClassNotFoundException ex) {
                             ex.printStackTrace();
                         }
 
-
-/*
-                        Boolean physical = physicalContextMain.analizarInformacionPhysicalContext("D:\\archivos\\objetociena.json","tapi-common:context",
+                        Boolean physical = physicalContextMain.analizarInformacionPhysicalContext(path,"tapi-common:context",
                                 "tapi-equipment:physical-context");
-                        Boolean device = deviceMain.analizarInformacionDevice("D:\\archivos\\objetociena.json","tapi-common:context",
+                        Boolean device = deviceMain.analizarInformacionDevice(path,"tapi-common:context",
                                 "tapi-equipment:physical-context","device");
-                        Boolean equipment = equipmentMain.analizarInformacionEquipment("D:\\archivos\\objetociena.json","tapi-common:context",
+                        Boolean equipment = equipmentMain.analizarInformacionEquipment(path,"tapi-common:context",
                                 "tapi-equipment:physical-context","device","equipment");
-                        Boolean accessport = accessPortMain.analizarInformacionAccessPort("D:\\archivos\\objetociena.json","tapi-common:context",
+                        Boolean accessport = accessPortMain.analizarInformacionAccessPort(path,"tapi-common:context",
                                 "tapi-equipment:physical-context","device","access-port");
 
-*/
-                        Boolean topology = topologyMain.analizarInformacionTopoloy("D:\\archivos\\objetociena.json","tapi-common:context",
+                        Boolean topology = topologyMain.analizarInformacionTopoloy(path,"tapi-common:context",
                                 "tapi-topology:topology-context","topology");
-                        Boolean node = nodeMain.analizarInformacionNode("D:\\archivos\\objetociena.json","tapi-common:context",
+                        Boolean node = nodeMain.analizarInformacionNode(path,"tapi-common:context",
                                 "tapi-topology:topology-context","topology","node");
-                        Boolean owned = ownedNodePoint.analizarInformacionOwned("D:\\archivos\\objetociena.json", "tapi-common:context",
+                        Boolean owned = ownedNodePoint.analizarInformacionOwned(path, "tapi-common:context",
                                 "tapi-topology:topology-context", "topology", "node", "owned-node-edge-point");
-                        Boolean link = linkmain.analizarInformacionLink("D:\\archivos\\objetociena.json", "tapi-common:context",
+                        Boolean link = linkmain.analizarInformacionLink(path, "tapi-common:context",
                                 "tapi-topology:topology-context", "topology", "link","node-edge-point");
 
                         if (topology && link && node && owned) {
