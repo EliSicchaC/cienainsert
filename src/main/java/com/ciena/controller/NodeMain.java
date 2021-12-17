@@ -38,10 +38,7 @@ public class NodeMain {
             JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
             JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
                     tapiContext, tapiTopology);
-
             JSONArray topologyArray = objetoTopologyContext.getJSONArray(topology);
-            JSONObject nodeContext = (JSONObject) topologyArray.get(0);
-            JSONArray listaDeNode= nodeContext.getJSONArray(node);
 
             List<String> listaColumnas = Util.listaDeColumnasPadreArray(topologyArray, node);
             String tablaReferencia = "exp_topology";

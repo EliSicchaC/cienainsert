@@ -117,7 +117,6 @@ public class TopologyMain {
 				recorre = tablaDicTopology.newRecord();
 				recorre.addField("atribute_name", objetos);
 				tablaDicTopology.insert(recorre);
-
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			return false;
