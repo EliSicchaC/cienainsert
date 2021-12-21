@@ -20,7 +20,7 @@ public class EquipmentMain {
 
     public EquipmentMain() throws SQLException, ClassNotFoundException {
         dataBase = new Conexion.DBConnector();
-        tablaEquipment = dataBase.deleteTableIfExsist("exp_physical_equipment");
+        tablaEquipment = dataBase.deleteTableIfExsist("exp_physical_device_equipment");
     }
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {

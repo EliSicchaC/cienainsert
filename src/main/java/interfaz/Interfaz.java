@@ -77,23 +77,23 @@ public class Interfaz extends JFrame {
                     if (path != "") {
                         analizando.setVisible(true);
 
-                        PhysicalContextMain physicalContextMain = null;
-                        DeviceMain deviceMain = null;
-                        EquipmentMain equipmentMain = null;
-                        AccessPortMain accessPortMain = null;
-
                         TopologyMain topologyMain = null;
                         LinkMain linkmain = null;
                         NodeMain nodeMain =null;
                         OwnedNodePoint ownedNodePoint = null;
+
+                        PhysicalContextMain physicalContextMain = null;
+                        DeviceMain deviceMain = null;
+                        EquipmentMain equipmentMain = null;
+                        AccessPortMain accessPortMain = null;
                         try {
                             linkmain = new LinkMain();
                             ownedNodePoint = new OwnedNodePoint();
                             nodeMain = new NodeMain();
                             topologyMain = new TopologyMain();
 
-                            equipmentMain = new EquipmentMain();
                             accessPortMain = new AccessPortMain();
+                            equipmentMain = new EquipmentMain();
                             deviceMain = new DeviceMain();
                             physicalContextMain = new PhysicalContextMain();
 
@@ -102,15 +102,6 @@ public class Interfaz extends JFrame {
                         } catch (ClassNotFoundException ex) {
                             ex.printStackTrace();
                         }
-
-                        Boolean physical = physicalContextMain.analizarInformacionPhysicalContext(path,"tapi-common:context",
-                                "tapi-equipment:physical-context");
-                        Boolean device = deviceMain.analizarInformacionDevice(path,"tapi-common:context",
-                                "tapi-equipment:physical-context","device");
-                        Boolean equipment = equipmentMain.analizarInformacionEquipment(path,"tapi-common:context",
-                                "tapi-equipment:physical-context","device","equipment");
-                        Boolean accessport = accessPortMain.analizarInformacionAccessPort(path,"tapi-common:context",
-                                "tapi-equipment:physical-context","device","access-port");
 
                         Boolean topology = topologyMain.analizarInformacionTopoloy(path,"tapi-common:context",
                                 "tapi-topology:topology-context","topology");
@@ -121,7 +112,16 @@ public class Interfaz extends JFrame {
                         Boolean link = linkmain.analizarInformacionLink(path, "tapi-common:context",
                                 "tapi-topology:topology-context", "topology", "link","node-edge-point");
 
-                        if (topology && link && node && owned) {
+                        Boolean physical = physicalContextMain.analizarInformacionPhysicalContext(path,"tapi-common:context",
+                                "tapi-equipment:physical-context");
+                        Boolean device = deviceMain.analizarInformacionDevice(path,"tapi-common:context",
+                                "tapi-equipment:physical-context","device");
+                        Boolean equipment = equipmentMain.analizarInformacionEquipment(path,"tapi-common:context",
+                                "tapi-equipment:physical-context","device","equipment");
+                        Boolean accessport = accessPortMain.analizarInformacionAccessPort(path,"tapi-common:context",
+                                "tapi-equipment:physical-context","device","access-port");
+
+                        if (topology && link && node && owned && physical && device && equipment && accessport) {
                             analizando.setText("Proceso exitoso!");
                         }else{
                             analizando.setText("Proceso Fallido!");

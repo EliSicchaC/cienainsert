@@ -21,7 +21,7 @@ public class AccessPortMain {
 
     public AccessPortMain() throws SQLException, ClassNotFoundException {
         dataBase = new Conexion.DBConnector();
-        tablaAccessPort = dataBase.deleteTableIfExsist("exp_physical_access_port");
+        tablaAccessPort = dataBase.deleteTableIfExsist("exp_physical_device_access_port");
     }
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         AccessPortMain main = new AccessPortMain();
