@@ -161,7 +161,7 @@ public class OwnedNode {
             record.addField("termination_direction",ownedNode.getTermination_direction());
             record.addField("layer_protocol_name",ownedNode.getLayer_protocol_name());
             record.addField("lifecycle_state",ownedNode.getLifecycle_state());
-            String nameStringValue = Util.generarNames(ownedNode.getName());
+            String nameStringValue = Util.generateNames(ownedNode.getName());
             System.out.println("nameStringValue: " + nameStringValue);
             record.addField("name", nameStringValue);
             record.addField("operational_state",ownedNode.getOperational_state());

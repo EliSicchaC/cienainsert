@@ -12,7 +12,7 @@ public class Device {
     @JsonProperty("name")
     private List<Name> name;
     @JsonProperty("access-port")
-    private List<AccessPort>access_port;
+    private List<AccessPortONEP>access_port;
 
     @Override
     public String toString() {
@@ -24,7 +24,7 @@ public class Device {
                 '}';
     }
 
-    public Device(String uuid, List<Equipment> equipment, List<Name> name, List<AccessPort> access_port) {
+    public Device(String uuid, List<Equipment> equipment, List<Name> name, List<AccessPortONEP> access_port) {
         this.uuid = uuid;
         this.equipment = equipment;
         this.name = name;
@@ -57,11 +57,11 @@ public class Device {
         this.name = name;
     }
 
-    public List<AccessPort> getAccess_port() {
+    public List<AccessPortONEP> getAccess_port() {
         return access_port;
     }
 
-    public void setAccess_port(List<AccessPort> access_port) {
+    public void setAccess_port(List<AccessPortONEP> access_port) {
         this.access_port = access_port;
     }
 }

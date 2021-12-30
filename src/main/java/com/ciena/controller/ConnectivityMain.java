@@ -14,66 +14,66 @@ import java.util.stream.Collectors;
 
 public class ConnectivityMain {
     private static Conexion.DBConnector dataBase;
-    private static DBTable tablaConectivity;
-    private static DBTable tablaDicConectivity;
+    private static DBTable tableConectivity;
+    private static DBTable tableDicConectivity;
 
     public ConnectivityMain() throws SQLException, ClassNotFoundException {
         dataBase = new Conexion.DBConnector();
-        tablaConectivity = dataBase.deleteTableIfExsist("exp_connectivity_service");
+        tableConectivity = dataBase.deleteTableIfExsist("exp_connectivity_service");
     }
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         ConnectivityMain connectivityMain = new ConnectivityMain();
-        connectivityMain.analizarInformacionConecctivity("D:\\archivos\\nuevoJSON.json","tapi-common:context",
+        connectivityMain.analyzeInformationConecctivity("D:\\archivos\\nuevoJSON.json","tapi-common:context",
                 "connectivity-context","connectivity-service");
     }
-    public Boolean analizarInformacionConecctivity(String rutaDeArchivo,String tapiContext,String connectivityContext,
-                                                   String connectivityService){
-        boolean analizo = false;
-        boolean insertoDiccionarioConectivity = false;
-        boolean insertoMatrizConecctivity = false;
-        System.out.println("-------------Procesando informacion de: " + connectivityService + "------- \n");
+    public Boolean analyzeInformationConecctivity(String fileRoute, String tapiContext, String connectivityContext,
+                                                  String connectivityService){
+        boolean analyze = false;
+        boolean insertDictionaryConectivity = false;
+        boolean insertMatrixConecctivity = false;
+        System.out.println("-------------Processing Information From: " + connectivityService + "------- \n");
         try{
-            JSONObject contenidoObjetosJSON = Util.parseJSONFile(rutaDeArchivo);
-            JSONObject objetoConectivityContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosJSON,
+            JSONObject totalObjectsJSON = Util.parseJSONFile(fileRoute);
+            JSONObject objectsConectivityContext = Util.returnListPropertiesParentAssociatesChildNode(totalObjectsJSON,
                     tapiContext,connectivityContext);
 
-            List<String> listaColumnas = Util.listaDeColumnasPadreObject(objetoConectivityContext, connectivityService);
+            List<String> columnList = Util.columnListParentObject(objectsConectivityContext, connectivityService);
 
-            insertoDiccionarioConectivity = insertoDiccionarioConectivity(listaColumnas, dataBase);
-            insertoMatrizConecctivity = insertoMatrizConecctivity(listaColumnas, dataBase, objetoConectivityContext, connectivityService);
+            insertDictionaryConectivity = insertDictionaryConectivity(columnList, dataBase);
+            insertMatrixConecctivity = insertoMatrizConecctivity(columnList, dataBase, objectsConectivityContext, connectivityService);
 
-            System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioConectivity + "/ "
-                    + insertoMatrizConecctivity);
-            analizo = insertoDiccionarioConectivity && insertoMatrizConecctivity ? true : false;
+            System.out.println("-------------Process executed successfully: " + insertDictionaryConectivity + "/ "
+                    + insertMatrixConecctivity);
+            analyze = insertDictionaryConectivity && insertMatrixConecctivity ? true : false;
         } catch (Exception e) {
-            analizo = false;
-            System.out.println("-------------Procesando con errores: " + e.getMessage());
+            analyze = false;
+            System.out.println("-------------Buggy process: " + e.getMessage());
             e.printStackTrace();
         }
-        return analizo;
+        return analyze;
     }
 
-    private boolean insertoMatrizConecctivity(List<String> listaDeColumnas, Conexion.DBConnector dataBase, JSONObject objetoConectivityContext, String connectivityService) {
+    private boolean insertoMatrizConecctivity(List<String> columnList, Conexion.DBConnector dataBase, JSONObject objectConectivityContext, String connectivityService) {
         Map<String, String> exp_connectivity = new HashMap<>();
-        for (String objectos : listaDeColumnas) {
-            String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
-            if (nombreColumna.equals("uuid")) {
-                exp_connectivity.put(nombreColumna, "varchar(50) primary key");
+        for (String objects : columnList) {
+            String columnName = objects.replaceAll("-", "_").replaceAll(":", "_");
+            if (columnName.equals("uuid")) {
+                exp_connectivity.put(columnName, "varchar(50) primary key");
             } else {
-                exp_connectivity.put(nombreColumna, "MEDIUMTEXT");
+                exp_connectivity.put(columnName, "MEDIUMTEXT");
             }
         }
         try{
-            tablaConectivity = Util.crearTablasGenericoMap(dataBase, "exp_connectivity_service", tablaConectivity,
+            tableConectivity = Util.createTableMap(dataBase, "exp_connectivity_service", tableConectivity,
                     exp_connectivity);
-            DBRecord record = tablaConectivity.newRecord();
-            JSONArray evaluarAConnectivityContext = objetoConectivityContext.getJSONArray(connectivityService);
-            for (Object objectEvaluado : evaluarAConnectivityContext) {
-                JSONObject objetosEvaluadoDeJson = (JSONObject) objectEvaluado;
-                Map<String, Object> objetosMap = objetosEvaluadoDeJson.toMap();
-                record = tablaConectivity.newRecord();
-                for (Map.Entry<String, Object> entry : objetosMap.entrySet()) {
-                    if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()) {
+            DBRecord record = tableConectivity.newRecord();
+            JSONArray evaluateAConnectivityContext = objectConectivityContext.getJSONArray(connectivityService);
+            for (Object objectEvaluated : evaluateAConnectivityContext) {
+                JSONObject objectEvaluatedJson = (JSONObject) objectEvaluated;
+                Map<String, Object> objectsMap = objectEvaluatedJson.toMap();
+                record = tableConectivity.newRecord();
+                for (Map.Entry<String, Object> entry : objectsMap.entrySet()) {
+                    if (columnList.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()) {
                         record.addField(entry.getKey().replaceAll("-", "_").replaceAll(":", "_"),
                                 entry.getValue().toString());
                     } else {
@@ -81,7 +81,7 @@ public class ConnectivityMain {
                     }
                 }
                 try {
-                    tablaConectivity.insert(record);
+                    tableConectivity.insert(record);
                 } catch (SQLException exception) {
                     exception.printStackTrace();
                 }
@@ -94,20 +94,20 @@ public class ConnectivityMain {
         return true;
     }
 
-    private boolean insertoDiccionarioConectivity(List<String> listaDeColumnas, Conexion.DBConnector dataBase) {
+    private boolean insertDictionaryConectivity(List<String> columnList, Conexion.DBConnector dataBase) {
         String[][] dicConectivity = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
                 { "atribute_name", "varchar(250)" } };
-        listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
+        columnList = columnList.stream().distinct().collect(Collectors.toList());
         try {
-            String nombreTabla = "dic_connectivity_service";
-            System.out.println("	-------------Creando tabla: " + nombreTabla);
-            tablaDicConectivity = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicConectivity, dicConectivity);
+            String tablaName = "dic_connectivity_service";
+            System.out.println("	-------------Creating table: " + tablaName);
+            tableDicConectivity = Util.createTableDictionary(dataBase, tablaName, tableDicConectivity, dicConectivity);
 
-            DBRecord recorre = tablaDicConectivity.newRecord();
-            for (String objetos : listaDeColumnas) {
-                recorre = tablaDicConectivity.newRecord();
-                recorre.addField("atribute_name", objetos);
-                tablaDicConectivity.insert(recorre);
+            DBRecord record = tableDicConectivity.newRecord();
+            for (String objects : columnList) {
+                record = tableDicConectivity.newRecord();
+                record.addField("atribute_name", objects);
+                tableDicConectivity.insert(record);
             }
         } catch (SQLException | ClassNotFoundException e) {
             return false;

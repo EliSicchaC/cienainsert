@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.sql.SQLException;
 
-public class AccesPort {
+public class AccessPortDevice {
     @JsonProperty("access-port-uuid")
     private String access_port_uuid;
     @JsonProperty("device-uuid")
@@ -20,11 +20,11 @@ public class AccesPort {
                 '}';
     }
 
-    public AccesPort(String access_port_uuid, String device_uuid) {
+    public AccessPortDevice(String access_port_uuid, String device_uuid) {
         this.access_port_uuid = access_port_uuid;
         this.device_uuid = device_uuid;
     }
-    public AccesPort(){
+    public AccessPortDevice(){
     }
 
     public String getAcces_port_uuid() {

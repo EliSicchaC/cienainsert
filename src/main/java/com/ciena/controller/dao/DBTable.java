@@ -16,11 +16,11 @@ public class DBTable {
 
         Statement stmt = conn.createStatement();
         String sql = "DROP TABLE IF EXISTS " + tableName;
-        System.out.println("ELIMINANDO TABLA" + tableName);
+        System.out.println("DELETING TABLE" + tableName);
         if (recreateTables == 1) {
             stmt.execute(sql);
 
-            System.out.println("Consulta: "+ sql);
+            System.out.println("query: "+ sql);
         }
 
     }
@@ -41,9 +41,8 @@ public class DBTable {
             stmt.execute(sql.toString());
         }
     }
-    public void    createTableMap(Map<String, String> fields) throws SQLException {
+    public void createTableMap(Map<String, String> fields) throws SQLException {
         StringBuffer sql = new StringBuffer("CREATE TABLE " + tableName + " (");
-        //EN SQL VA EL NOMBRE Y TIPO DE DATO Y TAMBIEN \n(CODIGO ASCCI) SIGNIFICA SALTO DE LINEA
         String prefix = " ";
         for (Map.Entry<String, String> entry : fields.entrySet()) {
             sql.append("\n" + prefix + entry.getKey() + " " +entry.getValue());
@@ -55,10 +54,10 @@ public class DBTable {
 
         if (recreateTables == 1) {
             stmt.execute(sql.toString());
-            agregarPrimaryKey();
+            addPrimaryKey();
         }
     }
-    public void agregarPrimaryKey() throws SQLException {
+    public void addPrimaryKey() throws SQLException {
         String prefix = "  ALTER TABLE " + tableName +   " ADD `id` INT(11) UNIQUE NOT NULL AUTO_INCREMENT FIRST   ";
         Statement stmt = conn.createStatement();
 

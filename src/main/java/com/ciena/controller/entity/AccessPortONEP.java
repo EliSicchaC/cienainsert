@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class AccessPort {
+public class AccessPortONEP {
     @JsonProperty("uuid")
     private String uuid;
     @JsonProperty("connector-pin")
@@ -21,12 +21,12 @@ public class AccessPort {
                 '}';
     }
 
-    public AccessPort(String uuid, List<ConnectorPin> connector_pin, List<Name> name) {
+    public AccessPortONEP(String uuid, List<ConnectorPin> connector_pin, List<Name> name) {
         this.uuid = uuid;
         this.connector_pin = connector_pin;
         this.name = name;
     }
-    public AccessPort(){
+    public AccessPortONEP(){
     }
 
     public String getUuid() {

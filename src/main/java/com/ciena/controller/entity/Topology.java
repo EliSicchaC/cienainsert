@@ -85,7 +85,7 @@ public class Topology {
         for(Topology topology : topologies){
             DBRecord record = tablaTopology.newRecord();
             record.addField("uuid", topology.getUuid());
-            String nameStringValue = Util.generarNames(topology.getName());
+            String nameStringValue = Util.generateNames(topology.getName());
             System.out.println("nameStringValue: " + nameStringValue);
             record.addField("name", nameStringValue);
             record.addField("layer_protocol_name", topology.getLayer_protocol_name().toString());

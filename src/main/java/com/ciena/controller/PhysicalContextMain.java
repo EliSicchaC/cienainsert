@@ -37,10 +37,10 @@ public class PhysicalContextMain {
         try{
 
             JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDelArchivo);
-            JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasAPadre(contenidoObjetosTotales,
+            JSONObject objetoTopologyContext = Util.returnListPropertiesParentAssociates(contenidoObjetosTotales,
                     tapiContext);
 
-            List<String> listaColumnas = Util.padreObject(objetoTopologyContext, physicalContext);
+            List<String> listaColumnas = Util.parentObject(objetoTopologyContext, physicalContext);
             insertoDiccionarioPhysical = insertarDiccionarioPhysical(listaColumnas, dataBase);
             insertoMatrizPhysical = insertarMatrizPhysical(listaColumnas, dataBase, objetoTopologyContext, physicalContext);
             System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioPhysical  + "/ "+ insertoMatrizPhysical);
@@ -67,7 +67,7 @@ public class PhysicalContextMain {
             }
         }
         try{
-            tablaExpPhysical = Util.crearTablasGenericoMap(dataBase, "exp_physical", tablaExpPhysical,
+            tablaExpPhysical = Util.createTableMap(dataBase, "exp_physical", tablaExpPhysical,
                     exp_Physical);
             DBRecord record = tablaExpPhysical.newRecord();
             JSONObject objetoTopology = objetoTopologyContext.getJSONObject(physicalContext);
@@ -99,7 +99,7 @@ public class PhysicalContextMain {
         try {
             String nombreTabla = "dic_physical";
             System.out.println("	-------------Creando tabla: " + nombreTabla);
-            tablaDicPhysical = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicPhysical, dicPhysical);
+            tablaDicPhysical = Util.createTableDictionary(dataBase, nombreTabla, tablaDicPhysical, dicPhysical);
             DBRecord recorre = tablaDicPhysical.newRecord();
             for (String objetos : listaDeColumnas) {
                 recorre = tablaDicPhysical.newRecord();

@@ -34,9 +34,9 @@ public class ServiceInterface {
         System.out.println("-------------Procesando informacion de: " + serviceInterface + "------- \n");
         try{
             JSONObject contenidoObjetosJSON = Util.parseJSONFile(rutaDeArchivo);
-            JSONObject objetoService = Util.retonarListaPropiedadesAsociadasAPadre(contenidoObjetosJSON,tapiContext);
+            JSONObject objetoService = Util.returnListPropertiesParentAssociates(contenidoObjetosJSON,tapiContext);
 
-            List<String> listaColumnas = Util.listaDeColumnasPadreObject(objetoService, serviceInterface);
+            List<String> listaColumnas = Util.columnListParentObject(objetoService, serviceInterface);
 
             insertoDiccionarioService = insertoDiccionarioService(listaColumnas, dataBase);
             insertoMatrizService = insertoMatrizService(listaColumnas, dataBase, objetoService, serviceInterface);
@@ -64,7 +64,7 @@ public class ServiceInterface {
             }
         }
         try{
-            tablaService = Util.crearTablasGenericoMap(dataBase, "exp_service_interface", tablaService,
+            tablaService = Util.createTableMap(dataBase, "exp_service_interface", tablaService,
                     exp_device_interface);
             DBRecord record = tablaService.newRecord();
             JSONArray evaluarAService = objetoService.getJSONArray(serviceInterface);
@@ -100,7 +100,7 @@ public class ServiceInterface {
         try{
             String nombreTabla = "dic_service_interface";
             System.out.println("	-------------Creando tabla: " + nombreTabla);
-            tablaDicService = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicService, dicService);
+            tablaDicService = Util.createTableDictionary(dataBase, nombreTabla, tablaDicService, dicService);
 
             DBRecord recorre = tablaDicService.newRecord();
             for (String objetos : listaDeColumnas) {

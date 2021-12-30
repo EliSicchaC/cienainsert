@@ -7,7 +7,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import util.Util;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +35,11 @@ public class NodeMain {
         try {
 
             JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
-            JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
+            JSONObject objetoTopologyContext = Util.returnListPropertiesParentAssociatesChildNode(contenidoObjetosTotales,
                     tapiContext, tapiTopology);
             JSONArray topologyArray = objetoTopologyContext.getJSONArray(topology);
 
-            List<String> listaColumnas = Util.listaDeColumnasPadreArray(topologyArray, node);
+            List<String> listaColumnas = Util.columnListParentArray(topologyArray, node);
             String tablaReferencia = "exp_topology";
             String columnaRefencia = "uuid";
             String nombreDeColumna = "uuid_topology";
@@ -69,7 +68,7 @@ public class NodeMain {
         }
         exp_Node.put(nombreDeColumna, "varchar(250) , FOREIGN KEY (uuid_topology) REFERENCES exp_topology(uuid)");
         try{
-            tablaNode = Util.crearTablasGenericoMap(dataBase, "exp_topology_node", tablaNode, exp_Node);
+            tablaNode = Util.createTableMap(dataBase, "exp_topology_node", tablaNode, exp_Node);
             DBRecord record = tablaNode.newRecord();
             for (Object objetosNode : evaluarANode){
                 JSONObject topologyUuid = (JSONObject) objetosNode;
@@ -110,7 +109,7 @@ public class NodeMain {
         try{
             String nombreTabla = "dic_topology_node";
             System.out.println("	-------------Creando tabla: " + nombreTabla);
-            tablaDicNode = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicNode, dicTopology);
+            tablaDicNode = Util.createTableDictionary(dataBase, nombreTabla, tablaDicNode, dicTopology);
             DBRecord recorre = tablaDicNode.newRecord();
             for (String objetos : listaDeColumnas) {
                 recorre = tablaDicNode.newRecord();

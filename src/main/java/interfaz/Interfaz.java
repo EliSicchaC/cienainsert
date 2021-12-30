@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -31,7 +30,7 @@ public class Interfaz extends JFrame {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // botón agregar
-        final JButton btn1 = new JButton("Subir");
+        final JButton btn1 = new JButton("Upload");
         btn1.setBounds(150, 70, 120, 25);
         btn1.setVisible(true);
         frame.add(btn1);
@@ -47,11 +46,11 @@ public class Interfaz extends JFrame {
         label.setFont(font);
         frame.add(label);
 
-        final JLabel analizando = new JLabel("Procesando");
-        analizando.setBounds(60, 100, 150, 25);
-        analizando.setFont(font);
-        analizando.setVisible(false);
-        frame.add(analizando);
+        final JLabel analyzing = new JLabel("Processing");
+        analyzing.setBounds(60, 100, 150, 25);
+        analyzing.setFont(font);
+        analyzing.setVisible(false);
+        frame.add(analyzing);
 
         // agregar cuadro de texto
         final JTextField textField = new JTextField();
@@ -66,16 +65,16 @@ public class Interfaz extends JFrame {
 
             @Override
             public void actionPerformed(final ActionEvent e) {
-                final JFileChooser selectorArchivos = new JFileChooser();
-                selectorArchivos.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-                final int returnVal = selectorArchivos.showOpenDialog(btn1);
+                final JFileChooser fileSelector = new JFileChooser();
+                fileSelector.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                final int returnVal = fileSelector.showOpenDialog(btn1);
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    final File file = selectorArchivos.getSelectedFile();
+                    final File file = fileSelector.getSelectedFile();
                     path = file.getAbsolutePath();
                     textField.setText(path);
 
                     if (path != "") {
-                        analizando.setVisible(true);
+                        analyzing.setVisible(true);
 
                         TopologyMain topologyMain = null;
                         LinkMain linkmain = null;
@@ -109,22 +108,22 @@ public class Interfaz extends JFrame {
                                 "tapi-topology:topology-context","topology","node");
                         Boolean owned = ownedNodePoint.analizarInformacionOwned(path, "tapi-common:context",
                                 "tapi-topology:topology-context", "topology", "node", "owned-node-edge-point");
-                        Boolean link = linkmain.analizarInformacionLink(path, "tapi-common:context",
+                        Boolean link = linkmain.analyzeInformationLink(path, "tapi-common:context",
                                 "tapi-topology:topology-context", "topology", "link","node-edge-point");
 
                         Boolean physical = physicalContextMain.analizarInformacionPhysicalContext(path,"tapi-common:context",
                                 "tapi-equipment:physical-context");
-                        Boolean device = deviceMain.analizarInformacionDevice(path,"tapi-common:context",
+                        Boolean device = deviceMain.analyzeInformationDevice(path,"tapi-common:context",
                                 "tapi-equipment:physical-context","device");
-                        Boolean equipment = equipmentMain.analizarInformacionEquipment(path,"tapi-common:context",
+                        Boolean equipment = equipmentMain.analyzeInformationEquipment(path,"tapi-common:context",
                                 "tapi-equipment:physical-context","device","equipment");
-                        Boolean accessport = accessPortMain.analizarInformacionAccessPort(path,"tapi-common:context",
+                        Boolean accessport = accessPortMain.analyzeInformationAccessPort(path,"tapi-common:context",
                                 "tapi-equipment:physical-context","device","access-port");
 
                         if (topology && link && node && owned && physical && device && equipment && accessport) {
-                            analizando.setText("Proceso exitoso!");
+                            analyzing.setText("Successful Process!");
                         }else{
-                            analizando.setText("Proceso Fallido!");
+                            analyzing.setText("Failed Process!");
                         }
                     }
                 }
@@ -133,7 +132,7 @@ public class Interfaz extends JFrame {
     }
 
     public void addInfo(final String string) {
-        final JFrame f = new JFrame("rápido");
+        final JFrame f = new JFrame("Fast");
         f.setLayout(null);
         f.setBounds(40, 40, 300, 100);
         f.setVisible(true);
@@ -142,6 +141,5 @@ public class Interfaz extends JFrame {
         final Font f1 = new Font("Song Ti", Font.BOLD, 12);
         label.setFont(f1);
         f.add(label);
-
     }
 }

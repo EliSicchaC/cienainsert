@@ -37,13 +37,13 @@ public class OwnedNodePoint {
 		try {
 
 			JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
-			JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
+			JSONObject objetoTopologyContext = Util.returnListPropertiesParentAssociatesChildNode(contenidoObjetosTotales,
 					tapiContext, tapiTopology);
 			JSONArray topologyArray = objetoTopologyContext.getJSONArray(topology);
 			JSONObject ownedNode = (JSONObject) topologyArray.get(0);
 			JSONArray listaDeNode = ownedNode.getJSONArray(node);
 
-			List<String> listaColumnas = Util.listaDeColumnasPadreArray(listaDeNode, ownedPoint);
+			List<String> listaColumnas = Util.columnListParentArray(listaDeNode, ownedPoint);
 			String tablaReferencia = "exp_topology_node";
 			String columnaRefencia = "uuid";
 			String nombreDeColumna = "uuid_node";
@@ -68,7 +68,7 @@ public class OwnedNodePoint {
 		try {
 			String nombreTabla = "dic_topology_node_onep";
 			System.out.println("	-------------Creando tabla: " + nombreTabla);
-			tablaDiccionario = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDiccionario, dicOwnedpoint);
+			tablaDiccionario = Util.createTableDictionary(dataBase, nombreTabla, tablaDiccionario, dicOwnedpoint);
 			DBRecord recorre = tablaDiccionario.newRecord();
 			for (String objetos : listaDeColumnas) {
 				recorre = tablaDiccionario.newRecord();
@@ -102,7 +102,7 @@ public class OwnedNodePoint {
 		}
 		tablaOwned.put(nombreDeColumna, "varchar(250) , FOREIGN KEY  (uuid_node) REFERENCES exp_topology_node(uuid)");
 		try {
-			tablaOwnedNode = Util.crearTablasGenericoMap(dataBase, "exp_topology_node_onep", tablaOwnedNode,
+			tablaOwnedNode = Util.createTableMap(dataBase, "exp_topology_node_onep", tablaOwnedNode,
 					tablaOwned);
 			DBRecord record = tablaOwnedNode.newRecord();
 			for (Object objetosNode : nodoEvaluar) {

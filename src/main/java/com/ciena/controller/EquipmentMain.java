@@ -15,85 +15,85 @@ import java.util.stream.Collectors;
 
 public class EquipmentMain {
     private Conexion.DBConnector dataBase;
-    private static DBTable tablaDicEquipment;
-    private static DBTable tablaEquipment;
+    private static DBTable tableDicEquipment;
+    private static DBTable tableEquipment;
 
     public EquipmentMain() throws SQLException, ClassNotFoundException {
         dataBase = new Conexion.DBConnector();
-        tablaEquipment = dataBase.deleteTableIfExsist("exp_physical_device_equipment");
+        tableEquipment = dataBase.deleteTableIfExsist("exp_physical_device_equipment");
     }
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
         EquipmentMain equipmentMain = new EquipmentMain();
-        equipmentMain.analizarInformacionEquipment("D:\\archivos\\objetociena.json","tapi-common:context",
+        equipmentMain.analyzeInformationEquipment("D:\\archivos\\objetociena.json","tapi-common:context",
                 "tapi-equipment:physical-context","device","equipment");
 
     }
-    public Boolean analizarInformacionEquipment(String rutaDeArchivo, String tapiContext, String tapiPhysical,
-                                                String device, String equipment) {
-        boolean analizo = false;
-        boolean insertoDiccionarioEquipment = false;
-        boolean insertoMatrizEquipment = false;
-        System.out.println("-------------Procesando informacion de: " + equipment + "------- \n");
+    public Boolean analyzeInformationEquipment(String fileRoute, String tapiContext, String tapiPhysical,
+                                               String device, String equipment) {
+        boolean analyze = false;
+        boolean insertDictionaryEquipment = false;
+        boolean insertMatrixEquipment = false;
+        System.out.println("-------------Processing Information From: " + equipment + "------- \n");
         try {
 
-            JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
-            JSONObject objetoTapiPhysical = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
+            JSONObject totalObjects = Util.parseJSONFile(fileRoute);
+            JSONObject objectTapiPhysical = Util.returnListPropertiesParentAssociatesChildNode(totalObjects,
                     tapiContext, tapiPhysical);
-            JSONArray deviceArray = objetoTapiPhysical.getJSONArray(device);
+            JSONArray deviceArray = objectTapiPhysical.getJSONArray(device);
             JSONObject nodeContext = (JSONObject) deviceArray.get(0);
-            JSONArray listaDeEquipment = nodeContext.getJSONArray(equipment);
+            JSONArray listEquipment = nodeContext.getJSONArray(equipment);
 
-            List<String> listaColumnas = Util.listaDeColumnasPadreArray(deviceArray, equipment);
+            List<String> columnList = Util.columnListParentArray(deviceArray, equipment);
 
-            String tablaReferencia = "exp_physical_device";
-            String columnaRefencia = "uuid";
-            String nombreDeColumna = "uuid_device";
+            String referenceTable = "exp_physical_device";
+            String referenceColumn = "uuid";
+            String columnName = "uuid_device";
 
-            insertoMatrizEquipment = insertarMatrizEquipment(listaColumnas, dataBase, deviceArray,equipment,tablaReferencia,columnaRefencia,nombreDeColumna);
-            insertoDiccionarioEquipment = insertarDiccionarioEquipment(listaColumnas, dataBase,tablaReferencia,columnaRefencia,nombreDeColumna);
-            System.out.println("-------------Procesando ejecutado con exito: " + insertoDiccionarioEquipment  + "/ "+ insertoMatrizEquipment);
-            analizo = insertoDiccionarioEquipment && insertoMatrizEquipment ? true : false;
+            insertMatrixEquipment = insertarMatrizEquipment(columnList, dataBase, deviceArray,equipment,referenceTable,referenceColumn,columnName);
+            insertDictionaryEquipment = insertDictionaryEquipment(columnList, dataBase,referenceTable,referenceColumn,columnName);
+            System.out.println("-------------Process executed successfully: " + insertDictionaryEquipment  + "/ "+ insertMatrixEquipment);
+            analyze = insertDictionaryEquipment && insertMatrixEquipment ? true : false;
         } catch (Exception e) {
-            analizo = false;
-            System.out.println("-------------Procesando con errores: " + e.getMessage());
+            analyze = false;
+            System.out.println("-------------Buggy process: " + e.getMessage());
             e.printStackTrace();
         }
-        return analizo;
+        return analyze;
     }
 
-    private boolean insertarMatrizEquipment(List<String> listaDeColumnas, Conexion.DBConnector dataBase, JSONArray deviceArray, String equipment, String tablaReferencia, String columnaRefencia, String nombreDeColumna) {
+    private boolean insertarMatrizEquipment(List<String> columnsList, Conexion.DBConnector dataBase, JSONArray deviceArray, String equipment, String referenceTable, String referenceColumn, String columnNameUuid) {
         Map<String, String> exp_equipment = new HashMap<>();
-        for (String objectos : listaDeColumnas) {
-            String nombreColumna = objectos.replaceAll("-", "_").replaceAll(":", "_");
-            if (nombreColumna.equals("uuid")) {
-                exp_equipment.put(nombreColumna, "varchar(50) primary key");
+        for (String objects : columnsList) {
+            String columnName = objects.replaceAll("-", "_").replaceAll(":", "_");
+            if (columnName.equals("uuid")) {
+                exp_equipment.put(columnName, "varchar(50) primary key");
             } else {
-                exp_equipment.put(nombreColumna, "MEDIUMTEXT");
+                exp_equipment.put(columnName, "MEDIUMTEXT");
             }
         }
         try{
-            exp_equipment.put(nombreDeColumna,"varchar(250) , FOREIGN KEY (uuid_device) REFERENCES exp_physical_device(uuid)");
-            tablaEquipment = Util.crearTablasGenericoMap(dataBase,"exp_physical_device_equipment",tablaEquipment,exp_equipment);
-            DBRecord record = tablaEquipment.newRecord();
-            for (Object objetosDevice : deviceArray){
-                JSONObject device = (JSONObject) objetosDevice;
-                String columnaUuid = device.get(columnaRefencia).toString();
+            exp_equipment.put(columnNameUuid,"varchar(250) , FOREIGN KEY (uuid_device) REFERENCES exp_physical_device(uuid)");
+            tableEquipment = Util.createTableMap(dataBase,"exp_physical_device_equipment", tableEquipment,exp_equipment);
+            DBRecord record = tableEquipment.newRecord();
+            for (Object objectsDevice : deviceArray){
+                JSONObject device = (JSONObject) objectsDevice;
+                String columnUuid = device.get(referenceColumn).toString();
                 JSONArray listEquipment = device.getJSONArray(equipment);
-                for (Object objectEvaluado : listEquipment){
-                    JSONObject objectEvaluadoDeJson = (JSONObject) objectEvaluado;
-                    Map<String, Object> objectMap = objectEvaluadoDeJson.toMap();
-                    record = tablaEquipment.newRecord();
+                for (Object objectEvaluate : listEquipment){
+                    JSONObject objectEvaluateJson = (JSONObject) objectEvaluate;
+                    Map<String, Object> objectMap = objectEvaluateJson.toMap();
+                    record = tableEquipment.newRecord();
                     for (Map.Entry<String, Object> entry : objectMap.entrySet()){
-                        if (listaDeColumnas.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()){
+                        if (columnsList.stream().filter(x -> entry.getKey().equals(x)).findFirst().isPresent()){
                             record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), entry.getValue().toString());
                         } else {
                             record.addField(entry.getKey().replaceAll("-","_").replaceAll(":","_"), null);
                         }
                     }
                     try {
-                        record.addField(nombreDeColumna, columnaUuid);
-                        tablaEquipment.insert(record);
+                        record.addField(columnNameUuid, columnUuid);
+                        tableEquipment.insert(record);
 
                     } catch (SQLException exception) {
                         exception.printStackTrace();
@@ -107,30 +107,30 @@ public class EquipmentMain {
         return true;
     }
 
-    private boolean insertarDiccionarioEquipment(List<String> listaDeColumnas, Conexion.DBConnector dataBase, String tablaReferencia, String columnaRefencia, String nombreDeColumna) {
+    private boolean insertDictionaryEquipment(List<String> columnList, Conexion.DBConnector dataBase, String referenceTable, String referenceColumn, String columnNameUuid) {
         String[][] dicDevice = new String[][] { { "id", "int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY" },
                 { "atribute_name", "varchar(250)" },{ "flag_fk","int(11)"},{"fk_foreign_object_name","varchar(250)"},
                 {"fk_foreign_object_name_atribute","varchar(250)"} };
-        listaDeColumnas = listaDeColumnas.stream().distinct().collect(Collectors.toList());
+        columnList = columnList.stream().distinct().collect(Collectors.toList());
         try {
-            String nombreTabla = "dic_physical_device_equipment";
-            System.out.println("	-------------Creando tabla: " + nombreTabla);
-            tablaDicEquipment = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicEquipment, dicDevice);
+            String tableName = "dic_physical_device_equipment";
+            System.out.println("	-------------Creating table: " + tableName);
+            tableDicEquipment = Util.createTableDictionary(dataBase, tableName, tableDicEquipment, dicDevice);
 
-            DBRecord recorre = tablaDicEquipment.newRecord();
-            for (String objetos : listaDeColumnas) {
-                recorre = tablaDicEquipment.newRecord();
-                recorre.addField("atribute_name", objetos);
-                recorre.addField("flag_fk",0);
-                tablaDicEquipment.insert(recorre);
+            DBRecord record = tableDicEquipment.newRecord();
+            for (String objetos : columnList) {
+                record = tableDicEquipment.newRecord();
+                record.addField("atribute_name", objetos);
+                record.addField("flag_fk",0);
+                tableDicEquipment.insert(record);
 
             }
-            recorre = tablaDicEquipment.newRecord();
-            recorre.addField("atribute_name",nombreDeColumna);
-            recorre.addField("flag_fk", 1);
-            recorre.addField("fk_foreign_object_name",tablaReferencia);
-            recorre.addField("fk_foreign_object_name_atribute",columnaRefencia);
-            tablaDicEquipment.insert(recorre);
+            record = tableDicEquipment.newRecord();
+            record.addField("atribute_name",columnNameUuid);
+            record.addField("flag_fk", 1);
+            record.addField("fk_foreign_object_name",referenceTable);
+            record.addField("fk_foreign_object_name_atribute",referenceColumn);
+            tableDicEquipment.insert(record);
         } catch (SQLException | ClassNotFoundException e) {
             return false;
         }

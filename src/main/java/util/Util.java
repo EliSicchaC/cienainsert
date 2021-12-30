@@ -3,7 +3,7 @@ package util;
 import com.ciena.controller.dao.Conexion;
 import com.ciena.controller.dao.DBTable;
 import com.ciena.controller.entity.Name;
-import com.ciena.controller.entity.ObjetosPrincipales;
+import com.ciena.controller.entity.mainObjects;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Util {
-	public static ObjetosPrincipales getObjetosPrincipales(String rutaDeArchivo) throws IOException {
+	public static mainObjects getObjectsMain(String fileRoute) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		// CONFIGURAMOS LA CLASE MAPPER CON ALGUNOS PARAMETROS PARA EVITAR ERRORES DE
 		// SITAXIS
@@ -33,121 +33,118 @@ public class Util {
 
 		// LEER EL ARCHIVO JSON PARA ELLO USAMOS LA CLASE FILE QUE ME PIDE UNA RUTA
 		// DONDE ESTA EL ARCHIVO
-		File archivoJson = new File(rutaDeArchivo);
+		File archivoJson = new File(fileRoute);
 
 		// PARA PODER TRANSFORMAR EL ARCHIVO A OBJETOS USAMOS EL READVALUE DE MAPPER,
 		// QUE ME PIDE EL ARCHIVO Y LA CLASE QUE ME SERVIRA PARA ALMACENAR LOS DATOS DEL
 		// ARCHIVO
-		ObjetosPrincipales principal = mapper.readValue(archivoJson, ObjetosPrincipales.class);
+		mainObjects principal = mapper.readValue(archivoJson, mainObjects.class);
 		return principal;
 	}
 
 	// REUTILIZANDO NAME
-	public static String generarNames(List<Name> listaDeNames) {
+	public static String generateNames(List<Name> listNames) {
 		String nameStringValue = "";
-		for (Name name : listaDeNames) {
+		for (Name name : listNames) {
 			nameStringValue = nameStringValue + name.getValue_name() + " : " + name.getValue() + " \n";
 		}
 		return nameStringValue;
 	}
 
-	public static DBTable crearTablasGenerico(Conexion.DBConnector dataBase, String nombreTabla, DBTable tabla,
-			String[][] fields) throws SQLException, ClassNotFoundException {
-		// PASO 1 ELIMINAR LA TABLA ANTERIOR
-		tabla = dataBase.deleteTableIfExsist(nombreTabla);
-		tabla.createTable(fields);
-		return tabla;
+	public static DBTable createTableDictionary(Conexion.DBConnector dataBase, String tableName, DBTable table,
+												String[][] fields) throws SQLException, ClassNotFoundException {
+		table = dataBase.deleteTableIfExsist(tableName);
+		table.createTable(fields);
+		return table;
 	}
 
-	public static DBTable crearTablasGenericoMap(Conexion.DBConnector dataBase, String nombreTabla, DBTable tabla,
-			Map<String, String> fields) throws SQLException, ClassNotFoundException {
-		// PASO 1 ELIMINAR LA TABLA ANTERIOR
-		tabla = dataBase.deleteTableIfExsist(nombreTabla);
-		tabla.createTableMap(fields);
-		return tabla;
+	public static DBTable createTableMap(Conexion.DBConnector dataBase, String tableName, DBTable table,
+										 Map<String, String> fields) throws SQLException, ClassNotFoundException {
+		table = dataBase.deleteTableIfExsist(tableName);
+		table.createTableMap(fields);
+		return table;
 	}
 
-	// TRANSFORMA A JSONOBJECT
 	public static JSONObject parseJSONFile(String filename) throws IOException {
-		String contenido = new String(Files.readAllBytes(Paths.get(filename)));
-		return new JSONObject(contenido);
+		String content = new String(Files.readAllBytes(Paths.get(filename)));
+		return new JSONObject(content);
 	}
-	public static JSONObject retonarListaPropiedadesAsociadasAPadre(JSONObject archivoJson, String nodoPadre){
-		JSONObject propiedades = null;
+	public static JSONObject returnListPropertiesParentAssociates(JSONObject archiveJson, String parentNode){
+		JSONObject properties = null;
 		try {
-			propiedades = archivoJson.getJSONObject(nodoPadre);
+			properties = archiveJson.getJSONObject(parentNode);
 
 		} catch (Exception exception) {
 			System.out.println("error:: " + exception.getMessage());
 		}
-		return propiedades;
+		return properties;
 	}
 
-	public static JSONObject retonarListaPropiedadesAsociadasNodoHijo(JSONObject archivoJson, String nodoPadre,
-			String nodoHijoPrimerSegmento) {
-		JSONObject propiedades = null;
+	public static JSONObject returnListPropertiesParentAssociatesChildNode(JSONObject archiveJson, String parentNode,
+																		   String childNodeFirstSegment) {
+		JSONObject properties = null;
 		try {
-			propiedades = archivoJson.getJSONObject(nodoPadre).getJSONObject(nodoHijoPrimerSegmento);
+			properties = archiveJson.getJSONObject(parentNode).getJSONObject(childNodeFirstSegment);
 
 		} catch (Exception exception) {
 			System.out.println("error:: " + exception.getMessage());
 		}
-		return propiedades;
+		return properties;
 	}
 
-	public static List<String> listaDeColumnasPadreArray(JSONArray nodoConLasColumnas, String nodo) {
-		List<String> listaDeColumnas = new ArrayList<>();
-		for (Object objetosNode : nodoConLasColumnas) {
-			JSONObject ownedNode = (JSONObject) objetosNode;
-			JSONArray listaDeEdgePoint = ownedNode.getJSONArray(nodo);
-			for (Object objetoEvaluado : listaDeEdgePoint) {
-				JSONObject objetoEvaluadoJson = (JSONObject) objetoEvaluado;
-				Map<String, Object> objectMap = objetoEvaluadoJson.toMap();
+	public static List<String> columnListParentArray(JSONArray nodeWithColumns, String node) {
+		List<String> columnList = new ArrayList<>();
+		for (Object objectsNode : nodeWithColumns) {
+			JSONObject ownedNode = (JSONObject) objectsNode;
+			JSONArray listEdgePoint = ownedNode.getJSONArray(node);
+			for (Object objectEvaluated : listEdgePoint) {
+				JSONObject objectEvaluatedJson = (JSONObject) objectEvaluated;
+				Map<String, Object> objectMap = objectEvaluatedJson.toMap();
 				for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-					listaDeColumnas.add(entry.getKey());
+					columnList.add(entry.getKey());
 				}
 			}
 		}
-		return listaDeColumnas;
+		return columnList;
 	}
-	public static List<String> columnasNoEncontradas(JSONArray nodoConLasColumnas, String nodo) {
-		List<String> listaDeColumnas = new ArrayList<>();
-		for (Object objetosNode : nodoConLasColumnas) {
-			JSONObject ownedNode = (JSONObject) objetosNode;
-			if(ownedNode.has(nodo)){
-				JSONArray listaDeEdgePoint = ownedNode.getJSONArray(nodo);
-				for (Object objetoEvaluado : listaDeEdgePoint) {
-					JSONObject objetoEvaluadoJson = (JSONObject) objetoEvaluado;
-					Map<String, Object> objectMap = objetoEvaluadoJson.toMap();
+	public static List<String> columnsNotFound(JSONArray nodeWithColumns, String node) {
+		List<String> columnList = new ArrayList<>();
+		for (Object objectNode : nodeWithColumns) {
+			JSONObject ownedNode = (JSONObject) objectNode;
+			if(ownedNode.has(node)){
+				JSONArray listEdgePoint = ownedNode.getJSONArray(node);
+				for (Object objectEvaluated : listEdgePoint) {
+					JSONObject objectEvaluatedJson = (JSONObject) objectEvaluated;
+					Map<String, Object> objectMap = objectEvaluatedJson.toMap();
 					for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-						listaDeColumnas.add(entry.getKey());
+						columnList.add(entry.getKey());
 					}
 				}
 			}
 		}
-		return listaDeColumnas;
+		return columnList;
 	}
 
-	public static List<String> listaDeColumnasPadreObject(JSONObject nodoConLasColumnas, String nodo) {
-		List<String> listaDeColumnas = new ArrayList<>();
-		JSONArray listaDeEdgePoint = nodoConLasColumnas.getJSONArray(nodo);
-		for (Object objetoEvaluado : listaDeEdgePoint) {
-			JSONObject objetoEvaluadoJson = (JSONObject) objetoEvaluado;
-			Map<String, Object> objectMap = objetoEvaluadoJson.toMap();
+	public static List<String> columnListParentObject(JSONObject nodeWithColumns, String node) {
+		List<String> columnList = new ArrayList<>();
+		JSONArray listEdgePoint = nodeWithColumns.getJSONArray(node);
+		for (Object objectEvaluated : listEdgePoint) {
+			JSONObject objectEvaluatedJson = (JSONObject) objectEvaluated;
+			Map<String, Object> objectMap = objectEvaluatedJson.toMap();
 			for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-				listaDeColumnas.add(entry.getKey());
+				columnList.add(entry.getKey());
 			}
 		}
-		return listaDeColumnas;
+		return columnList;
 	}
-	public static List<String> padreObject(JSONObject nodoConLasColumnas, String nodo) {
-		List<String> listaDeColumnas = new ArrayList<>();
-		JSONObject listaDeEdgePoint = nodoConLasColumnas.getJSONObject(nodo);
-		JSONObject objetoEvaluadoJson = listaDeEdgePoint;
-		Map<String, Object> objectMap = objetoEvaluadoJson.toMap();
+	public static List<String> parentObject(JSONObject nodeWithColumns, String node) {
+		List<String> columnList = new ArrayList<>();
+		JSONObject listEdgePoint = nodeWithColumns.getJSONObject(node);
+		JSONObject objectEvaluatedJson = listEdgePoint;
+		Map<String, Object> objectMap = objectEvaluatedJson.toMap();
 		for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-			listaDeColumnas.add(entry.getKey());
+			columnList.add(entry.getKey());
 		}
-		return listaDeColumnas;
+		return columnList;
 	}
 }

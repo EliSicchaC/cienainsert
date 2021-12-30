@@ -8,7 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import util.Util;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +37,11 @@ public class TopologyMain {
 
 			//AQUI ME ESTOY POSICIONANDO EN TAPITOPOLOGY
 			JSONObject contenidoObjetosTotales = Util.parseJSONFile(rutaDeArchivo);
-			JSONObject objetoTopologyContext = Util.retonarListaPropiedadesAsociadasNodoHijo(contenidoObjetosTotales,
+			JSONObject objetoTopologyContext = Util.returnListPropertiesParentAssociatesChildNode(contenidoObjetosTotales,
 					tapiContext, tapiTopology);
 
 			//AQUI ESTOY TRAYENDO LOS OBJETOS DE TOPOLOGY, POR ESO ME ESTOY POSICIONANDO EN ÉL
-			List<String> listaColumnas = Util.listaDeColumnasPadreObject(objetoTopologyContext, topology);
+			List<String> listaColumnas = Util.columnListParentObject(objetoTopologyContext, topology);
 
 			insertoDiccionarioTopology = insertarDiccionarioTopology(listaColumnas, dataBase);
 
@@ -72,7 +71,7 @@ public class TopologyMain {
 		}
 		exp_topology.put("uuid_topology_context", "varchar(250)");
 		try {
-			tablaTopology = Util.crearTablasGenericoMap(dataBase, "exp_topology", tablaTopology,
+			tablaTopology = Util.createTableMap(dataBase, "exp_topology", tablaTopology,
 					exp_topology);
 			DBRecord record = tablaTopology.newRecord();
 			//MI NODO PADRE ES UN OBJETO Y YO QUIERO MI NODO HIJO, LO QUE TENDRIA QUE HACER ES POSICIONARME
@@ -110,7 +109,7 @@ public class TopologyMain {
 		try {
 			String nombreTabla = "dic_topology";
 			System.out.println("	-------------Creando tabla: " + nombreTabla);
-			tablaDicTopology = Util.crearTablasGenerico(dataBase, nombreTabla, tablaDicTopology, dicTopology);
+			tablaDicTopology = Util.createTableDictionary(dataBase, nombreTabla, tablaDicTopology, dicTopology);
 
 			DBRecord recorre = tablaDicTopology.newRecord();
 			for (String objetos : listaDeColumnas) {

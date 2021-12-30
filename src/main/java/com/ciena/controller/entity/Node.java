@@ -87,7 +87,7 @@ public class Node {
             record = tablaNode.newRecord();
             record.addField("uuid", node.getUuid());
             record.addField("lifecycle_state",node.getLifecycle_state());
-            String nameStringValue = Util.generarNames(node.getName());
+            String nameStringValue = Util.generateNames(node.getName());
             System.out.println("nameStringValue: " + nameStringValue);
             record.addField("name", nameStringValue);
             record.addField("operational_state",node.getOperational_state());
